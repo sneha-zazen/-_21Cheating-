@@ -7,6 +7,7 @@ The repository name can only contain ASCII letters, digits, and the characters .
 so here _21 stands for %21 which then stands for !
 
 is it convoluted? maybe? but lowkey what isnt here
+
 | Name      | Redbulls Consumed |
 |-----------|-------------------|
 | Harrison  | 0010              |
