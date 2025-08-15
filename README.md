@@ -17,4 +17,4 @@ is it convoluted? maybe? but lowkey what isnt here
 | Kayla?    | 0000              |
 | Eric?     | 0010              |
 |-----------|-------------------|
-| Total     | 1000              |
+| Total     |                   |
