@@ -15,6 +15,6 @@ is it convoluted? maybe? but lowkey what isnt here
 | Sneha     | 0011              |
 | Lily?     | 0000              |
 | Kayla?    | 0000              |
-| Eric?     | 0010              |
+| Eric      | 0010 + 1          |
 |-----------|-------------------|
-| Total     |                   |
+| Total     | 1011              |
