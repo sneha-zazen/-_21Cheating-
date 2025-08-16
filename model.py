@@ -88,3 +88,9 @@ def process_image(file_path):
 if __name__ == "__main__":
     file_path = "images/csse_circle.png"  # Replace with your image file path
     print(process_image(file_path))
+    file_path = "images/csse_1.jpg"  
+    print(process_image(file_path))
+    file_path = "images/csse_2.jpg"
+    print(process_image(file_path))
+    file_path = "images/csse_3.jpg"
+    print(process_image(file_path))
