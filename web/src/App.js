@@ -1,10 +1,16 @@
 import React, { useState, useRef } from "react";
 import HomePage from "./pages/homepage";
 import ReportPage from "./pages/reportpage";
-import UserInfoPage from "./pages/userpage";
+import LoginPage from "./pages/login";
 import { themeColor } from "./styles";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import UserInfoPage from "./pages/userpage";
+import { useNavigate } from "react-router-dom";
 
-function Header({ page, setPage }) {
+function Header() {
+  const navigate = useNavigate();
+  const [page, setPage] = useState("home");
+
   return (
     <header
       style={{
@@ -38,56 +44,72 @@ function Header({ page, setPage }) {
           }}
         >
           <button
-            onClick={() => setPage("home")}
+            onClick={() => navigate("/home/1")}
             style={{
-              background: page === "home" ? "#fff" : "transparent",
-              color: page === "home" ? themeColor : "#fff",
+              background: "transparent",
+              color: "#fff",
               border: "none",
               borderRadius: 6,
               padding: "8px 18px",
               fontWeight: 600,
               fontSize: 16,
               cursor: "pointer",
-              boxShadow: page === "home" ? `0 2px 8px ${themeColor}22` : "none",
+              boxShadow: "none",
               transition: "background 0.2s",
             }}
           >
             Home
           </button>
           <button
-            onClick={() => setPage("report")}
+            onClick={() => navigate("/report/1")}
             style={{
-              background: page === "report" ? "#fff" : "transparent",
-              color: page === "report" ? themeColor : "#fff",
+              background: "transparent",
+              color: "#fff",
               border: "none",
               borderRadius: 6,
               padding: "8px 18px",
               fontWeight: 600,
               fontSize: 16,
               cursor: "pointer",
-              boxShadow:
-                page === "report" ? `0 2px 8px ${themeColor}22` : "none",
+              boxShadow: "none",
               transition: "background 0.2s",
             }}
           >
             Report
           </button>
           <button
-            onClick={() => setPage("user")}
+            onClick={() => navigate("/user/1")}
             style={{
-              background: page === "user" ? "#fff" : "transparent",
-              color: page === "user" ? themeColor : "#fff",
+              background: "transparent",
+              color: "#fff",
               border: "none",
               borderRadius: 1,
               padding: "8px 18px",
               fontWeight: 600,
               fontSize: 16,
               cursor: "pointer",
-              boxShadow: page === "user" ? `0 2px 8px ${themeColor}22` : "none",
+              boxShadow: "none",
               transition: "background 0.2s",
             }}
           >
             User
+          </button>
+          <button
+            onClick={() => navigate("/")}
+            style={{
+              background: "transparent",
+              color: "#fff",
+              border: "none",
+              borderRadius: 6,
+              padding: "8px 18px",
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: "pointer",
+              boxShadow: "none",
+              transition: "background 0.2s",
+            }}
+          >
+            Log in
           </button>
         </nav>
       </div>
@@ -97,77 +119,16 @@ function Header({ page, setPage }) {
 
 export default function App() {
   const [page, setPage] = useState("home");
-  const [subjects, setSubjects] = useState(["ENGG4901", "CSSE1001", "PYSCH"]);
-  const [selectedCourse, setSelectedCourse] = useState("");
-  const [timer, setTimer] = useState(0); // timer in ms
-  const [running, setRunning] = useState(false);
-  const [files, setFiles] = useState([]);
-  const intervalRef = useRef(null);
-
-  // Dummy report data
-  const [score, setScore] = useState(0);
-  const reportData = {
-    left: ["Result A", "Result B", "Result C"],
-    right: ["Detail 1", "Detail 2", "Detail 3"],
-  };
-
-  const addFile = (newFiles) => {
-    setFiles((prev) => [...prev, ...newFiles]);
-  };
-
-  const removeFile = (idx) => {
-    setFiles((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleStart = () => {
-    setRunning(true);
-    intervalRef.current = setInterval(() => {
-      setTimer((t) => t + 10); // update every 10ms
-    }, 10);
-  };
-
-  const handleStop = () => {
-    setRunning(false);
-    clearInterval(intervalRef.current);
-    setScore(Math.floor(Math.random() * 100)); // Dummy score
-    setPage("report");
-  };
-
-  const handleGoBack = () => {
-    setPage("home");
-    setTimer(0);
-    setRunning(false);
-    setFiles([]);
-    setSelectedCourse("");
-  };
-
   // Pass setPage to Header and all pages
   return (
-    <>
-      <Header page={page} setPage={setPage} />
-      {page === "home" && (
-        <HomePage
-          onStart={handleStart}
-          onStop={handleStop}
-          timer={timer}
-          running={running}
-          files={files}
-          addFile={addFile}
-          removeFile={removeFile}
-          selectedCourse={selectedCourse}
-          setSelectedCourse={setSelectedCourse}
-          subjects={subjects}
-          setSubjects={setSubjects}
-        />
-      )}
-      {page === "report" && (
-        <ReportPage
-          score={score}
-          reportData={reportData}
-          onGoBack={handleGoBack}
-        />
-      )}
-      {page === "user" && <UserInfoPage />}
-    </>
+    <BrowserRouter>
+      <Header />
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/home/:userid" element={<HomePage />} />
+        <Route path="/report/:sessionid" element={<ReportPage />} />
+        <Route path="/user/:userid" element={<UserInfoPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
