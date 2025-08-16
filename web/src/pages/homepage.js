@@ -29,6 +29,42 @@ export default function HomePage({ currentUser }) {
     course.code.toLowerCase().includes(inputValue.toLowerCase())
   );
 
+  const uploadFiles = async (files) => {
+    for (let i = 0; i < files.length; i++) {
+      const formData = new FormData();
+      formData.append("file", files[i]);
+      formData.append("session_id", sessionId); // if your endpoint uses this
+
+      try {
+        const response = await axios.post(
+          "http://10.89.249.11:5000/process_paper",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (response.data.success) {
+          console.log(
+            `File ${files[i].name} uploaded successfully`,
+            response.data.data
+          );
+        } else {
+          console.error(
+            `Failed to upload ${files[i].name}:`,
+            response.data.error
+          );
+        }
+      } catch (error) {
+        console.error(`Error uploading ${files[i].name}:`, error);
+      }
+    }
+
+    setFiles([]); // clear files after upload if desired
+  };
+
   useEffect(() => {
     axios
       .get("http://localhost:5000/get_courses")
@@ -323,6 +359,26 @@ export default function HomePage({ currentUser }) {
             </li>
           ))}
         </ul>
+        {files.length > 0 && (
+          <div
+            style={{
+              marginTop: 16,
+              textAlign: "center",
+              color: themeColor,
+              fontWeight: 500,
+            }}
+          >
+            <button
+              onClick={() => uploadFiles(files)}
+              style={{
+                ...buttonStyle,
+                background: `linear-gradient(90deg, #a8edea 0%, ${themeColor} 100%)`,
+              }}
+            >
+              Upload Files
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

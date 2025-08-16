@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify
 import sqlite3
 import os
 from werkzeug.utils import secure_filename
-from model import process_image
+from model import process_image, process_paper
 from flask_cors import CORS
 from datetime import datetime
+import base64
+from io import BytesIO
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -78,6 +80,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             year INTEGER NOT NULL,
             course_id INTEGER,
+            type TEXT DEFAULT 'final',
             FOREIGN KEY (course_id) REFERENCES courses (id)
         )
     ''')
@@ -108,35 +111,50 @@ init_db()
 # Endpoint 1: Upload image and return JSON response
 @app.route("/process_image", methods=["POST"])
 def process_image_endpoint():
-    if "image" not in request.files:
-        return jsonify({"error": "No image file provided"}), 400
-    if "session_id" not in request.form:
-        return jsonify({"error": "Session ID is required"}), 400
-    
-    image = request.files["image"]
-    if image.filename == "":
-        return jsonify({"error": "Empty filename"}), 400
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Request must be JSON"}), 400
 
-    # Process the image using the model
-    result = process_image(image)
-    
+    if "image" not in data:
+        return jsonify({"error": "No image provided"}), 400
+    if "session_id" not in data:
+        return jsonify({"error": "Session ID is required"}), 400
+
+    try:
+        # Decode base64 image from JSON payload
+        image_bytes = base64.b64decode(data["image"])
+        image_file = BytesIO(image_bytes)
+
+        # Optional: verify image opens correctly
+        # img = Image.open(image_file)
+        # img.verify()
+
+    except Exception as e:
+        return jsonify({"error": f"Invalid image data: {str(e)}"}), 400
+
+    # Process the image using your model function
+    result = process_image(image_file)  # modify process_image to accept BytesIO
+
     if not result:
         return jsonify({"error": "No question or answer found in the image"}), 400
     
-    # Save the result to the database
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
-    c.execute("INSERT INTO session_answers (session_id, question_id, response) VALUES (?, ?, ?)", 
-              (request.form["session_id"], result["question"], result["response"]))
+    if type(result) is list:
+        for item in result:
+            c.execute(
+                "INSERT INTO session_answers (session_id, question_id, response) VALUES (?, ?, ?)",
+                (data["session_id"], item["question"], item["response"])
+            )
+    else:
+        c.execute(
+            "INSERT INTO session_answers (session_id, question_id, response) VALUES (?, ?, ?)",
+            (data["session_id"], result["question"], result["response"])
+        )
     conn.commit()
     conn.close()
 
-    # TODO: Search database for the question and answer
-
-    if result:
-        return jsonify({"message": "Image processed successfully", "data": result, "success": True}), 200
-    else:
-        return jsonify({"error": "Failed to process image"}), 500
+    return jsonify({"message": "Image processed successfully", "data": result, "success": True}), 200
 
 # Endpoint 2: Save JSON into SQLite
 @app.route("/create_user", methods=["POST"])
@@ -379,53 +397,46 @@ def get_user_sessions():
 
     return jsonify({"data": data, "success": True}), 200
 
-# session_id = request.args.get("session_id")
+@app.route("/process_paper", methods=["POST"])
+def process_paper_endpoint():
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
     
-#     print("Received session ID:", session_id)
-#     if not session_id:
-#         return jsonify({"error": "Session ID is required"}), 400
+    file = request.files["file"]
+    
+    print("Received file:", file.filename)
+    
+    if file.filename == "":
+        return jsonify({"error": "Empty filename"}), 400
 
-#     conn = sqlite3.connect("data.db")
-#     c = conn.cursor()
-#     try:
-#         c.execute("SELECT * FROM sessions WHERE id = ?", (session_id,))
-#         c.execute("SELECT * FROM session_answers WHERE session_id = ?", (session_id,))
-#         session = c.fetchone()
-#         answers = c.fetchall()
-#         questions = []
-#         for answer in answers:
-#             c.execute("SELECT * FROM questions WHERE id = ?", (answer[2],))
-#             question = c.fetchone()
-#             questions.append({
-#                 "question_text": question[1] if question else None,
-#                 "correct_answer": question[2] if question else None,
-#                 "response": answer[3]
-#             })
-#     except sqlite3.Error as e:
-#         conn.close()
-#         return jsonify({"error": str(e), "success": False}), 500
-#     conn.close()
+    # Read the file into memory
+    file_bytes = file.read()
+    file_obj = BytesIO(file_bytes)
 
+    # Process the paper using your model function
+    # Make sure your process_paper function accepts a file-like object
+    result = process_paper(file_obj)  
+    
+    if not result:
+        return jsonify({"error": "Failed to process paper"}), 500
+    
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT id FROM courses WHERE code = ?", (result["course_code"],))
+    course = c.fetchone()
+    if not course:
+        c.execute("INSERT INTO courses (code, name) VALUES (?, ?)", (result["course_code"], "Course Name Placeholder"))
+        conn.commit()
+    c.execute("INSERT INTO papers (year, course_id) VALUES (?, ?)", (result["year"], result["course_code"]))
+    paper_id = c.lastrowid
+    for question in result["questions"]:
+        c.execute("INSERT INTO questions (question_text, correct_answer, paper_id) VALUES (?, ?, ?)", 
+                  (question["question"], question["response"], paper_id))
+    conn.commit()
+    conn.close()
+    
 
-#     data = {
-#         "session": {
-#             "id": session[0],
-#             "course_id": session[1],
-#             "user_id": session[2],
-#             "paper_id": session[3],
-#             "active": session[4],
-#             "hint_count": session[5],
-#             "score": session[6],
-#             "date_created": session[7],
-#             "date_finished": session[8] if session[8] else None
-#         },
-#         "questions": questions
-#     }
-
-#     if session:
-#         return jsonify({"data": data, "success": True}), 200
-#     else:
-#         return jsonify({"error": "Session not found", "success": False}), 404
+    return jsonify({"message": "Paper processed successfully", "data": result, "success": True}), 200
 
 @app.route("/get_session_answers", methods=["GET"])
 def get_session_answers():
@@ -555,6 +566,73 @@ def get_hint():
     return jsonify({"error": "No correct answer found for this question", "success": False}), 404
 
 
+@app.route("/get_user_stats", methods=["GET"])
+def get_user_stats():
+    # count how many sessions users have completed
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT users.user_id, COUNT(*), users.username FROM sessions JOIN users ON sessions.user_id = users.user_id WHERE sessions.active = 0 GROUP BY users.user_id")
+    user_stats = c.fetchall()
+    conn.close()
+    data = {
+        "user_stats": [{"user_id": stat[0], "completed_sessions": stat[1], "username": stat[2]} for stat in user_stats]
+    }
+
+    return jsonify({"data": data, "success": True}), 200
+
+@app.route("/get_question_frequencies", methods=["GET"])
+def get_question_frequencies():
+    course_code = request.args.get("course_id")
+    if not course_code:
+        return jsonify({"error": "Course code is required"}), 400
+    
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("""
+    SELECT q.question_text, COUNT(*) AS frequency
+    FROM questions q
+    JOIN papers p ON q.paper_id = p.id
+    JOIN courses c ON p.course_id = c.code   -- careful here
+    WHERE c.code = ?
+    GROUP BY q.question_text
+    """, (course_code,))    
+    question_frequencies = c.fetchall()
+    conn.close()
+    
+    data = {
+        "question_frequencies": [{"question_text": freq[0], "count": freq[1]} for freq in question_frequencies]
+    }
+    
+    return jsonify({"data": data, "success": True}), 200
+
+
+
+@app.route("/get_paper_by_id", methods=["GET"])
+def get_paper_by_id():
+    paper_id = request.args.get("paper_id")
+    if not paper_id:
+        return jsonify({"error": "Paper ID is required"}), 400
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM papers WHERE id = ?", (paper_id,))
+    paper = c.fetchone()
+    c.execute("SELECT * FROM questions WHERE paper_id = ?", (paper_id,))
+    questions = c.fetchall()
+    conn.close()
+    if not paper:
+        return jsonify({"error": "Paper not found", "success": False}), 404
+    data = {
+        "paper": {
+            "id": paper[0],
+            "year": paper[1],
+            "course_id": paper[2],
+            "type": paper[3]
+        },
+        "questions": [{"id": question[0], "question_text": question[1], "correct_answer": question[2]} for question in questions]
+    }
+    return jsonify({"data": data, "success": True}), 200
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
 

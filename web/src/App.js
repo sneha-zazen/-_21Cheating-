@@ -6,6 +6,7 @@ import { themeColor } from "./styles";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import UserInfoPage from "./pages/userpage";
 import { useNavigate } from "react-router-dom";
+import StatsPage from "./pages/stats";
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -80,6 +81,23 @@ export default function App() {
               User
             </button>
             <button
+              onClick={() => navigate(`/stats`)}
+              style={{
+                background: "transparent",
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
+                padding: "8px 18px",
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: "pointer",
+                boxShadow: "none",
+                transition: "background 0.2s",
+              }}
+            >
+              Stats
+            </button>
+            <button
               onClick={() => navigate(`/`)}
               style={{
                 background: "transparent",
@@ -120,6 +138,8 @@ export default function App() {
           path="/user"
           element={<UserInfoPage currentUser={currentUser} />}
         />
+        <Route path="/stats" element={<StatsPage />} />
+        <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </BrowserRouter>
   );
