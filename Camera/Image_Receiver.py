@@ -17,19 +17,19 @@ print("start")
 while (True):
     try:
         # print("Connecting...")
-        ser = serial.Serial(p, BAUD_RATE, timeout=4)
+        ser = serial.Serial(p, BAUD_RATE, timeout=5)
         ser.write(b'1')
         ser.flush()
         s = ser.read(200000)
         # print("bytes:", len(s))
-        with open("test1.jpg", "wb") as f:
+        with open("test2.jpg", "wb") as f:
             f.write(s)
             f.truncate()
         f.close()
         ser.close()
         print("bytes:", len(s))
     except serial.SerialException as e:
-        # print("FAIL - Sleeping for 3 seconds...")
+        print("FAIL - Sleeping for 3 seconds...")
         time.sleep(3)
 
     # print("outside")
