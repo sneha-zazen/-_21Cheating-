@@ -4,27 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 export default function UserInfoPage({ currentUser }) {
   const [search, setSearch] = useState("");
-  const [sessions, setSessions] = useState([
-    // TODO add server call
-    {
-      sessionid: "CSSE4011 ",
-      score: 85,
-      hintsUsed: 2,
-      time: "2025-02-15 14:30",
-    },
-    {
-      sessionid: "ELEC4701",
-      score: 92,
-      hintsUsed: 0,
-      time: "2025-01-15 14:30",
-    },
-    {
-      sessionid: "CSSE1001",
-      score: 74,
-      hintsUsed: 3,
-      time: "2025-02-03 14:30",
-    },
-  ]);
+  const [sessions, setSessions] = useState([ ]);
   const navigate = useNavigate();
 
   useEffect(() => {
