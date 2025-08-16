@@ -17,8 +17,13 @@ ports = serial.tools.list_ports.comports()
 for port in ports:
     # print(port.name, port.hwid)
     # Example for a generic Bluetooth Serial Port on Windows
-    if "BTHENUM" in port.hwid:
+    # if "BTHENUM" in port.hwid:
+    #     p = port.device
+    #     break
+    print("Port:", port.name, "Description:", port.description)
+    if "Bluetooth-serial" in port.description:
         p = port.device
+        print("Found Bluetooth Serial Port:", p)
         break
 
 print("start")

@@ -30,7 +30,7 @@ question but no answer, return the question with an empty answer field:
 ONLY return the JSON object, do not include any other text or formatting.
 """
 
-def process_pdf(file_path):
+def process_paper(file_obj):
     prompt = """
     You will be given a PDF file containing exam questions. Your task is to extract
     the year of the exam, the course code, the type of exam (e.g., midterm, final), 
@@ -58,11 +58,17 @@ def process_pdf(file_path):
     
     Return EXACTLY this JSON structure, with no additional text or formatting.
     """
-    with open(file_path, "rb") as f:
-        uploaded_file = client.files.create(
-            file=f,
-            purpose="assistants"  # or "fine-tune" depending on usage
-        )
+    file_obj.name = "exam_paper.pdf"  # Ensure the file has a name for the API
+    print("asdf", file_obj.name)
+    
+    uploaded_file = client.files.create(
+        file=file_obj,
+        purpose="assistants"
+    )
+    
+    print("aosdjflasfkj;ldsahfashkjldfhklh")
+    print(uploaded_file)  # Inspect the full object
+    print("Uploaded file ID:", uploaded_file.id)
 
     response = client.chat.completions.create(
         model="gpt-4.1-mini",
@@ -92,7 +98,7 @@ def process_pdf(file_path):
 
 
 
-def process_image(file_path):
+def process_image(image_file):
     """
     Process an image file to extract question and answer. If the image contains a question and an answer, 
     it returns a dictionary object with fields "question" and "response". If the image does not contain a question or answer,
@@ -119,10 +125,10 @@ def process_image(file_path):
     Returns:
     - dict: A dictionary containing the question and answer extracted from the image.
     """
-    with open(file_path, "rb") as f:
-        image_base64 = base64.b64encode(f.read()).decode("utf-8")
-
-
+    image_file.seek(0)
+    image_bytes = image_file.read()
+    image_b64 = base64.b64encode(image_bytes).decode("utf-8")  
+    
     response = client.chat.completions.create(
         model="gpt-4.1-mini",
         messages=[
@@ -130,7 +136,7 @@ def process_image(file_path):
                 "role": "user",
                 "content": [
                     {"type": "text", "text": PROMPT},
-                    {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_base64}"}},
+                    {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}},
                 ],
             }
         ],
