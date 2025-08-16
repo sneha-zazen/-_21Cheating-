@@ -14,6 +14,7 @@ export default function LoginPage() {
       return;
     }
 
+    // local address
     axios
       .post("http://10.89.249.11:5000/create_user", { username: name })
       .then((response) => {
