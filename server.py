@@ -250,9 +250,9 @@ def create_session():
 
 @app.route("/get_session", methods=["GET"])
 def get_session():
-    session_id = request.args.get("session_id")
+    session_id = int(request.args.get("session_id"))
     
-    print("Received session ID:", session_id)
+    print("Received session ID:", session_id, type(session_id))
     if not session_id:
         return jsonify({"error": "Session ID is required"}), 400
 
@@ -260,8 +260,11 @@ def get_session():
     c = conn.cursor()
     try:
         c.execute("SELECT * FROM sessions WHERE id = ?", (session_id,))
-        c.execute("SELECT * FROM session_answers WHERE session_id = ?", (session_id,))
         session = c.fetchone()
+        if not session:
+            conn.close()
+            return jsonify({"error": "Session not found", "success": False}), 404
+        c.execute("SELECT * FROM session_answers WHERE session_id = ?", (session_id,))
         answers = c.fetchall()
         questions = []
         for answer in answers:
