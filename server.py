@@ -4,7 +4,7 @@ import os
 from werkzeug.utils import secure_filename
 from model import process_image
 from flask_cors import CORS
-import datetime
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -67,6 +67,7 @@ def init_db():
             hint_count INTEGER DEFAULT 0,
             score INTEGER DEFAULT 0,
             date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            date_finished TIMESTAMP DEFAULT NULL,
             FOREIGN KEY (course_id) REFERENCES courses (id),
             FOREIGN KEY (user_id) REFERENCES users (id),
             FOREIGN KEY (paper_id) REFERENCES papers (id)
@@ -241,7 +242,8 @@ def create_session():
         "active": 1,
         "hint_count": 0,
         "score": 0,
-        "date_created": datetime.now().strftime("%Y-%m-%d %H:%M:%S")    
+        "date_created": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "date_finished": None
     }
 
     return jsonify({"message": "Session created successfully", "data": data, "success": True}), 201
@@ -269,7 +271,8 @@ def get_session():
             "active": session[4],
             "hint_count": session[5],
             "score": session[6],
-            "date_created": session[7]
+            "date_created": session[7],
+            "date_finished": session[8] if session[8] else None
         },
         "answers": [{"id": answer[0], "response": answer[3]} for answer in answers]
     }

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   themeColor,
   gradientBg,
@@ -7,14 +7,15 @@ import {
   disabledButtonStyle,
 } from "../styles";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
 export default function HomePage() {
   const { userid } = useParams();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-  const [courses, setCourses] = useState(["CSSE1001"]); // TODO: Fetch from backend
-  const [selectedCourse, setSelectedCourse] = useState("CSSE1001");
+  const [courses, setCourses] = useState([]); // TODO: Fetch from backend
+  const [selectedCourse, setSelectedCourse] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef(null); // Add this line
@@ -22,11 +23,32 @@ export default function HomePage() {
   const [running, setRunning] = useState(false);
   const [files, setFiles] = useState([]);
   const intervalRef = useRef(null);
+  const [sessionId, setSessionId] = useState(null);
 
   // Filter courses based on input
-  const filteredcourses = courses.filter((sub) =>
-    sub.toLowerCase().includes(inputValue.toLowerCase())
+  const filteredcourses = courses.filter((course) =>
+    course.code.toLowerCase().includes(inputValue.toLowerCase())
   );
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/get_courses")
+      .then((response) => {
+        if (response.data.success) {
+          setCourses(response.data.data.courses);
+          setLoading(false);
+          console.log(
+            "Courses fetched successfully:",
+            response.data.data.courses
+          );
+        } else {
+          console.error("Failed to fetch courses:", response.data.error);
+        }
+      })
+      .catch((error) => {
+        console.error("There was an error fetching courses!", error);
+      });
+  }, []);
 
   // Timer formatting
   const seconds = Math.floor(timer / 1000);
@@ -46,14 +68,47 @@ export default function HomePage() {
 
   const handleAddcourse = () => {
     if (inputValue && !courses.includes(inputValue)) {
-      setCourses([...courses, inputValue]);
-      setSelectedCourse(inputValue);
-      setShowDropdown(false);
+      axios
+        .post("http://localhost:5000/create_course", {
+          code: inputValue,
+          name: inputValue,
+        })
+        .then((response) => {
+          if (response.data.success) {
+            setCourses((prev) => [...prev, inputValue]);
+            setSelectedCourse(inputValue);
+            setInputValue("");
+            setShowDropdown(false);
+            console.log("Course added successfully:", inputValue);
+          } else {
+            console.error("Failed to add course:", response.data.error);
+          }
+        })
+        .catch((error) => {
+          console.error("There was an error adding the course!", error);
+        });
     }
   };
 
   const onStart = () => {
     setRunning(true);
+    axios
+      .post("http://localhost:5000/create_session", {
+        user_id: userid,
+        course_id: selectedCourse,
+        paper_id: 1,
+      })
+      .then((response) => {
+        if (response.data.success) {
+          console.log("Session created successfully:", response.data);
+          setSessionId(response.data.data.session_id);
+        } else {
+          console.error("Failed to create session:", response.data.error);
+        }
+      })
+      .catch((error) => {
+        console.error("There was an error creating the session!", error);
+      });
     intervalRef.current = setInterval(() => {
       setTimer((t) => t + 10); // update every 10ms
     }, 10);
@@ -62,8 +117,7 @@ export default function HomePage() {
   const onStop = () => {
     setRunning(false);
     clearInterval(intervalRef.current);
-    // TODO: Get active session for user from backend
-    navigate(`/report/1`); // Navigate to report page with dummy ID
+    navigate(`/report/${sessionId}`);
   };
 
   const addFile = (newFiles) => {
@@ -73,7 +127,9 @@ export default function HomePage() {
   const removeFile = (idx) => {
     setFiles((prev) => prev.filter((_, i) => i !== idx));
   };
-  return (
+  return loading ? (
+    <>loading</>
+  ) : (
     <div style={gradientBg}>
       <div style={cardStyle}>
         <label
@@ -126,18 +182,19 @@ export default function HomePage() {
                 }}
               >
                 {filteredcourses.length > 0 ? (
-                  filteredcourses.map((sub) => (
+                  filteredcourses.map((course) => (
                     <div
-                      key={sub}
-                      onClick={() => handleSelectcourse(sub)}
+                      key={course.code}
+                      onClick={() => handleSelectcourse(course.code)}
                       style={{
                         padding: "10px 16px",
                         cursor: "pointer",
                         color: themeColor,
-                        background: sub === selectedCourse ? "#f3eaff" : "#fff",
+                        background:
+                          course.code === selectedCourse ? "#f3eaff" : "#fff",
                       }}
                     >
-                      {sub}
+                      {course.code}
                     </div>
                   ))
                 ) : (
@@ -145,20 +202,23 @@ export default function HomePage() {
                     No courses found.
                   </div>
                 )}
-                {inputValue && !courses.includes(inputValue) && (
-                  <div
-                    onClick={handleAddcourse}
-                    style={{
-                      padding: "10px 16px",
-                      cursor: "pointer",
-                      color: themeColor,
-                      background: "#e6e6fa",
-                      fontWeight: 600,
-                    }}
-                  >
-                    + Add "{inputValue}"
-                  </div>
-                )}
+                {inputValue &&
+                  ![...courses.map((course) => course.code)].includes(
+                    inputValue
+                  ) && (
+                    <div
+                      onClick={handleAddcourse}
+                      style={{
+                        padding: "10px 16px",
+                        cursor: "pointer",
+                        color: themeColor,
+                        background: "#e6e6fa",
+                        fontWeight: 600,
+                      }}
+                    >
+                      + Add "{inputValue}"
+                    </div>
+                  )}
               </div>
             )}
           </div>
