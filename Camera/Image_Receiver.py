@@ -16,21 +16,23 @@ for port in ports:
 print("start")
 while (True):
     try:
-        print("Connecting...")
+        # print("Connecting...")
         ser = serial.Serial(p, BAUD_RATE, timeout=4)
         ser.write(b'1')
-        # ser.flush()
-        s = ser.read(500000)
-        print("bytes:", len(s))
-        with open("test.jpg", "wb") as f:
+        ser.flush()
+        s = ser.read(200000)
+        # print("bytes:", len(s))
+        with open("test1.jpg", "wb") as f:
             f.write(s)
             f.truncate()
         f.close()
         ser.close()
+        print("bytes:", len(s))
     except serial.SerialException as e:
-        print("FAIL - Sleeping for 3 seconds...")
+        # print("FAIL - Sleeping for 3 seconds...")
         time.sleep(3)
-    print("outside")
+
+    # print("outside")
     # ser = serial.Serial('COM6', 115200, timeout=1, parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE)
     # print(ser.name)
 
