@@ -30,7 +30,7 @@ while (True):
         print("bytes:", len(s))
     except serial.SerialException as e:
         print("FAIL - Sleeping for 3 seconds...")
-        time.sleep(3)
+        time.sleep(2)
 
     # print("outside")
     # ser = serial.Serial('COM6', 115200, timeout=1, parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE)

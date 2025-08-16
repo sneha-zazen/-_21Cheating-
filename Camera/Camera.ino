@@ -12,6 +12,9 @@
   The above copyright notice and this permission notice shall be included in all
   copies or substantial portions of the Software.
 *********/
+// Select Board "AI Thinker ESP32-CAM"
+// Must use ESP32 Module
+
 
 #include "esp_camera.h"
 #include "Arduino.h"
@@ -46,6 +49,7 @@
 
 int pictureNumber = 0;
 
+// Bluetooth initialisation
 #include "BluetoothSerial.h"
 
 String device_name = "ESP32-BT-Slave";
@@ -63,17 +67,19 @@ String device_name = "ESP32-BT-Slave";
 BluetoothSerial SerialBT;
 
 void setup() {
+  // must run the following line
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
  
   Serial.begin(115200);
   //Serial.setDebugOutput(true);
   //Serial.println();
-  SerialBT.begin(device_name);
+  SerialBT.begin(device_name); // initialise bluetooth with defined name
   Serial.printf("The device with name \"%s\" is started.\nNow you can pair it with Bluetooth!\n", device_name.c_str());
 
   while (!SerialBT.available()) {
     delay(50);
   }
+  // must have this delay, waits for connection?
 
   Serial.println("Time to take a photo!");
   
@@ -118,7 +124,6 @@ void setup() {
     Serial.println("Camera is good to go!");
   }
 
-    
   camera_fb_t * fb = NULL;
   
   // Take Picture with Camera
@@ -137,10 +142,11 @@ void setup() {
   EEPROM.begin(EEPROM_SIZE);
   pictureNumber = EEPROM.read(0) + 1;
 
+  // writing to bluetooth ===================
   SerialBT.write(fb->buf, fb->len); // payload (image), payload length
   EEPROM.write(0, pictureNumber);
   EEPROM.commit();
-
+  Serial.println(fb->len);
   esp_camera_fb_return(fb); 
   
   // Turns off the ESP32-CAM white on-board LED (flash) connected to GPIO 4
