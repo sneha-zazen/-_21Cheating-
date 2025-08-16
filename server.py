@@ -37,12 +37,12 @@ app.config["QUESTIONS_FOLDER"] = QUESTIONS_FOLDER
 def init_db():
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
-    c.execute("DROP TABLE IF EXISTS users")
-    c.execute("DROP TABLE IF EXISTS courses")
-    c.execute("DROP TABLE IF EXISTS sessions")
-    c.execute("DROP TABLE IF EXISTS papers")
-    c.execute("DROP TABLE IF EXISTS session_answers")
-    c.execute("DROP TABLE IF EXISTS questions")
+    # c.execute("DROP TABLE IF EXISTS users")
+    # c.execute("DROP TABLE IF EXISTS courses")
+    # c.execute("DROP TABLE IF EXISTS sessions")
+    # c.execute("DROP TABLE IF EXISTS papers")
+    # c.execute("DROP TABLE IF EXISTS session_answers")
+    # c.execute("DROP TABLE IF EXISTS questions")
     
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
