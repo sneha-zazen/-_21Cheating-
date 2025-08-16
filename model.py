@@ -1,15 +1,28 @@
-import requests
+from llava.model import LlavaForCausalLM
+from llava.tokenizer import LlavaTokenizer
+from llava.processors import LlavaProcessor
 from PIL import Image
-from transformers import Blip2Processor, Blip2ForConditionalGeneration
+import torch
 
-processor = Blip2Processor.from_pretrained("Salesforce/blip2-opt-2.7b")
-model = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-opt-2.7b", device_map="auto")
+model_path = "./models/llava-v1.6-mistral-7b"
+image_path = "csse_example.png"
+question = "What's the answer to the question in the image?"
 
-img_url = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/demo.jpg' 
-raw_image = Image.open(requests.get(img_url, stream=True).raw).convert('RGB')
+# Load processor, tokenizer, and model
+processor = LlavaProcessor.from_pretrained(model_path)
+tokenizer = LlavaTokenizer.from_pretrained(model_path)
+model = LlavaForCausalLM.from_pretrained(model_path, device_map="auto", load_in_4bit=True)
 
-question = "how many dogs are in the picture?"
-inputs = processor(raw_image, question, return_tensors="pt").to("cuda")
+# Load image
+image = Image.open(image_path).convert("RGB")
 
-out = model.generate(**inputs)
-print(processor.decode(out[0], skip_special_tokens=True))
+# Prepare inputs
+inputs = processor(images=[image], text=[question], return_tensors="pt").to(model.device)
+
+# Generate
+with torch.no_grad():
+    output_ids = model.generate(**inputs, max_new_tokens=50)
+
+# Decode
+answer = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+print("Answer:", answer)

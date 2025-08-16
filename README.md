@@ -10,11 +10,10 @@ is it convoluted? maybe? but lowkey what isnt here
 
 | Name      | Redbulls Consumed |
 |-----------|-------------------|
-| Harrison  | 0010              |
+| Harrison  | 0011              |
 | Dhanan    | 0011              |
 | Sneha     | 0011              |
-| Lily?     | 0000              |
-| Kayla?    | 0000              |
-| Eric?     | 0000              |
-|-----------|-------------------|
+| Lil       | 0000              |
+| Kayla     | 0000              |
+| Erik      | 0010              |
 | Total     | 1000              |
