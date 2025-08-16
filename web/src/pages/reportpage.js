@@ -20,6 +20,7 @@ export default function ReportPage() {
 
   useEffect(() => {
     // Fetch report data from backend
+
     axios
       .get(`http://localhost:5000/get_session`, {
         params: { session_id: sessionid },
@@ -28,6 +29,7 @@ export default function ReportPage() {
         if (response.data.success) {
           setReportData(response.data.data);
           setLoading(false);
+          console.log("Report data fetched successfully:", response.data.data);
         } else {
           console.error("Failed to fetch report data:", response.data.error);
         }
@@ -65,7 +67,7 @@ export default function ReportPage() {
           <span role="img" aria-label="score" style={{ marginRight: 8 }}>
             🏆
           </span>
-          Score: {reportData.session.score || "N/A"}
+          Score: {reportData.session.score}
         </div>
         <div
           style={{
@@ -89,9 +91,9 @@ export default function ReportPage() {
               Column 1
             </strong>
             <ul style={{ marginTop: 12 }}>
-              {reportData.answers.map((answer, idx) => (
+              {reportData.questions.map((question, idx) => (
                 <li key={idx} style={{ marginBottom: 8 }}>
-                  {answer.response || "No response"}
+                  {question.question_text || "No question text available"}
                 </li>
               ))}
             </ul>
