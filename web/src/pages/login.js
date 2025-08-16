@@ -16,12 +16,12 @@ export default function LoginPage({ setCurrentUser }) {
 
     // local address
     axios
-      .post("http://10.89.249.11:5000/create_user", { username: name })
+      .post("http://localhost:5000/create_user", { username: name })
       .then((response) => {
         if (response.data.success) {
           console.log(response);
           setCurrentUser(response.data.data.userid);
-          navigate(`/home/${response.data.data.userid}`);
+          navigate(`/home`);
         } else {
           console.log(response);
           alert("Failed to create user", response.data.error);
@@ -35,7 +35,7 @@ export default function LoginPage({ setCurrentUser }) {
           .then((response) => {
             if (response.data.success) {
               setCurrentUser(response.data.data.userid);
-              navigate(`/home/${response.data.data.userid}`);
+              navigate(`/home`);
             }
           })
           .catch((error) => {

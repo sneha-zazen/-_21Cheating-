@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { themeColor, gradientBg, cardStyle, buttonStyle } from "../styles";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
 export default function UserInfoPage({ currentUser }) {
   const [search, setSearch] = useState("");
-  const [sessions, setSessions] = useState([ ]);
+  const [sessions, setSessions] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000//get_user_sessions", 
-        {params: { userid: userid },})
+      .get("http://localhost:5000//get_user_sessions", {
+        params: { userid: currentUser },
+      })
       .then((response) => {
         if (response.data.success) {
           setSessions(response.data.data.sessions);
@@ -103,8 +105,9 @@ export default function UserInfoPage({ currentUser }) {
                     Hints Used:{" "}
                     <span style={{ fontWeight: 500 }}>{session.hintsUsed}</span>
                   </div>
-                  <div style={{ color: themeColor, textAlign: "right"}}>{session.date_created}</div>
-
+                  <div style={{ color: themeColor, textAlign: "right" }}>
+                    {session.date_created}
+                  </div>
                 </div>
               ))
             )}

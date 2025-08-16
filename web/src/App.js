@@ -46,7 +46,7 @@ export default function App() {
             }}
           >
             <button
-              onClick={() => navigate(`/home/${currentUser?.userid || 1}`)}
+              onClick={() => navigate(`/home`)}
               style={{
                 background: "transparent",
                 color: "#fff",
@@ -63,7 +63,7 @@ export default function App() {
               Home
             </button>
             <button
-              onClick={() => navigate(`/user/${currentUser?.userid || 1}`)}
+              onClick={() => navigate(`/user`)}
               style={{
                 background: "transparent",
                 color: "#fff",
