@@ -1,28 +1,26 @@
-from llava.model import LlavaForCausalLM
-from llava.tokenizer import LlavaTokenizer
-from llava.processors import LlavaProcessor
-from PIL import Image
-import torch
+from openai import OpenAI
+import base64
 
-model_path = "./models/llava-v1.6-mistral-7b"
+client = OpenAI()
+
+# Path to your local image
 image_path = "csse_example.png"
-question = "What's the answer to the question in the image?"
 
-# Load processor, tokenizer, and model
-processor = LlavaProcessor.from_pretrained(model_path)
-tokenizer = LlavaTokenizer.from_pretrained(model_path)
-model = LlavaForCausalLM.from_pretrained(model_path, device_map="auto", load_in_4bit=True)
+# Encode the image as base64
+with open(image_path, "rb") as f:
+    image_base64 = base64.b64encode(f.read()).decode("utf-8")
 
-# Load image
-image = Image.open(image_path).convert("RGB")
+response = client.chat.completions.create(
+    model="gpt-4.1-mini",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "What's the answer to the question in this image?"},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_base64}"}},
+            ],
+        }
+    ],
+)
 
-# Prepare inputs
-inputs = processor(images=[image], text=[question], return_tensors="pt").to(model.device)
-
-# Generate
-with torch.no_grad():
-    output_ids = model.generate(**inputs, max_new_tokens=50)
-
-# Decode
-answer = tokenizer.decode(output_ids[0], skip_special_tokens=True)
-print("Answer:", answer)
+print(response.choices[0].message.content)
