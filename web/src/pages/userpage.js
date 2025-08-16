@@ -1,17 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { themeColor, gradientBg, cardStyle, buttonStyle } from "../styles";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
 export default function UserInfoPage() {
   const { userid } = useParams();
   const [search, setSearch] = useState("");
-  const [sessions, setSessions] = useState([
-    // TODO add server call
-    { sessionid: "CSSE4011 ", score: 85, hintsUsed: 2, time: "2025-02-15 14:30"},
-    { sessionid: "ELEC4701", score: 92, hintsUsed: 0, time: "2025-01-15 14:30" },
-    { sessionid: "CSSE1001", score: 74, hintsUsed: 3, time: "2025-02-03 14:30" },
-  ]);
+  const [sessions, setSessions] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/get_sessions")
+      .then((response) => {
+        if (response.data.success) {
+          setSessions(response.data.sessions || []);
+          console.log(
+            "Sessions fetched successfully:",
+            response.data.data.sessions
+          );
+        } else {
+          console.error("Failed to fetch sessions:", response.data.error);
+        }
+      })
+      .catch((error) => {
+        console.error("There was an error fetching sessions!", error);
+      });
+  }, []);
 
   // Filter sessions by search
   const filteredSessions = sessions.filter(
@@ -35,7 +50,6 @@ export default function UserInfoPage() {
         >
           Session History
         </h1>
-        
         <div style={{ marginTop: 32 }}>
           <h2 style={{ color: themeColor, fontWeight: 600, marginBottom: 12 }}>
             Search Sessions
