@@ -359,8 +359,70 @@ def get_user_sessions():
     c.execute("SELECT * FROM sessions WHERE user_id = ?", (user_id,))
     sessions = c.fetchall()
     conn.close()
+    
+    data = {"sessions": [{
+        "id": session[0], 
+        "name": session[1],
+        "id": session[0],
+        "course_id": session[1],
+        "user_id": session[2],
+        "paper_id": session[3],
+        "active": session[4],
+        "hint_count": session[5],
+        "score": session[6],
+        "date_created": session[7]
+        } for session in sessions]
+    }
 
-    return jsonify({"sessions": sessions, "success": True}), 200
+    return jsonify({"data": data, "success": True}), 200
+
+# session_id = request.args.get("session_id")
+    
+#     print("Received session ID:", session_id)
+#     if not session_id:
+#         return jsonify({"error": "Session ID is required"}), 400
+
+#     conn = sqlite3.connect("data.db")
+#     c = conn.cursor()
+#     try:
+#         c.execute("SELECT * FROM sessions WHERE id = ?", (session_id,))
+#         c.execute("SELECT * FROM session_answers WHERE session_id = ?", (session_id,))
+#         session = c.fetchone()
+#         answers = c.fetchall()
+#         questions = []
+#         for answer in answers:
+#             c.execute("SELECT * FROM questions WHERE id = ?", (answer[2],))
+#             question = c.fetchone()
+#             questions.append({
+#                 "question_text": question[1] if question else None,
+#                 "correct_answer": question[2] if question else None,
+#                 "response": answer[3]
+#             })
+#     except sqlite3.Error as e:
+#         conn.close()
+#         return jsonify({"error": str(e), "success": False}), 500
+#     conn.close()
+
+
+#     data = {
+#         "session": {
+#             "id": session[0],
+#             "course_id": session[1],
+#             "user_id": session[2],
+#             "paper_id": session[3],
+#             "active": session[4],
+#             "hint_count": session[5],
+#             "score": session[6],
+#             "date_created": session[7],
+#             "date_finished": session[8] if session[8] else None
+#         },
+#         "questions": questions
+#     }
+
+#     if session:
+#         return jsonify({"data": data, "success": True}), 200
+#     else:
+#         return jsonify({"error": "Session not found", "success": False}), 404
 
 @app.route("/get_session_answers", methods=["GET"])
 def get_session_answers():

@@ -11,10 +11,11 @@ export default function UserInfoPage() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/get_sessions")
+      .get("http://localhost:5000//get_user_sessions", 
+        {params: { userid: userid },})
       .then((response) => {
         if (response.data.success) {
-          setSessions(response.data.sessions || []);
+          setSessions(response.data.data.sessions);
           console.log(
             "Sessions fetched successfully:",
             response.data.data.sessions
@@ -31,7 +32,7 @@ export default function UserInfoPage() {
   // Filter sessions by search
   const filteredSessions = sessions.filter(
     (s) =>
-      s.sessionid.includes(search) ||
+      s.id.includes(search) ||
       s.score.toString().includes(search) ||
       s.hintsUsed.toString().includes(search)
   );
@@ -78,8 +79,8 @@ export default function UserInfoPage() {
             ) : (
               filteredSessions.map((session) => (
                 <div
-                  key={session.sessionid}
-                  onClick={() => navigate(`/report/${session.sessionid}`)}
+                  key={session.id}
+                  onClick={() => navigate(`/report/${session.id}`)}
                   style={{
                     background: "#f7f7f7",
                     borderRadius: 8,
@@ -92,7 +93,7 @@ export default function UserInfoPage() {
                   }}
                 >
                   <div style={{ fontWeight: 600, color: themeColor }}>
-                    Session: {session.sessionid}
+                    Session: {session.id}
                   </div>
                   <div style={{ marginTop: 6, color: "#333" }}>
                     Score:{" "}
@@ -101,7 +102,7 @@ export default function UserInfoPage() {
                     Hints Used:{" "}
                     <span style={{ fontWeight: 500 }}>{session.hintsUsed}</span>
                   </div>
-                  <div style={{ color: themeColor, textAlign: "right"}}>{session.time}</div>
+                  <div style={{ color: themeColor, textAlign: "right"}}>{session.date_created}</div>
 
                 </div>
               ))
