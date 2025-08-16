@@ -1,6 +1,7 @@
 from openai import OpenAI
 import base64
 import pprint
+import json
 
 client = OpenAI()
 
@@ -28,6 +29,66 @@ question but no answer, return the question with an empty answer field:
 
 ONLY return the JSON object, do not include any other text or formatting.
 """
+
+def process_pdf(file_path):
+    prompt = """
+    You will be given a PDF file containing exam questions. Your task is to extract
+    the year of the exam, the course code, the type of exam (e.g., midterm, final), 
+    and a list of question answer pairs. Each question should be associated with its answer
+    and the answer should be the text of the answer, not the option letter. On some 
+    papers, the answer may be highlighted or circled. If no answer is highlighted,
+    return an empty string for the response. 
+    
+    Return the extracted information as a JSON object with the following structure:
+    {
+        "year": "2023",
+        "course_code": "CSEE1001",
+        "exam_type": "midterm",
+        "questions": [
+            {
+                "question": "What is the capital of France?",
+                "response": "Paris"
+            },
+            {
+                "question": "What is 2 + 2?",
+                "response": "4"
+            }
+        ]
+    }
+    
+    Return EXACTLY this JSON structure, with no additional text or formatting.
+    """
+    with open(file_path, "rb") as f:
+        uploaded_file = client.files.create(
+            file=f,
+            purpose="assistants"  # or "fine-tune" depending on usage
+        )
+
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "file",
+                        "file": {
+                            "file_id": uploaded_file.id  # ✅ this is what the API wants
+                        },
+                    },
+                ],
+            }
+        ],
+    )
+
+    response_text = response.choices[0].message.content.strip()
+    try:
+        result = json.loads(response_text)
+        return result
+    except json.JSONDecodeError:
+        print("⚠️ Failed to decode JSON:", response_text)
+        return None
 
 
 
@@ -61,9 +122,6 @@ def process_image(file_path):
     with open(file_path, "rb") as f:
         image_base64 = base64.b64encode(f.read()).decode("utf-8")
 
-    # Encode the image as base64
-    with open(file_path, "rb") as f:
-        image_base64 = base64.b64encode(f.read()).decode("utf-8")
 
     response = client.chat.completions.create(
         model="gpt-4.1-mini",
@@ -79,10 +137,11 @@ def process_image(file_path):
     )
     
     # Extract the response text
+    print("Response:", response)
     response_text = response.choices[0].message.content.strip()
     try:
         # Parse the response as JSON
-        import json
+        
         result = json.loads(response_text)
         return result
     except json.JSONDecodeError:
@@ -90,8 +149,8 @@ def process_image(file_path):
 
 
 if __name__ == "__main__":
-    file_path = "images/csse_cam.jpg"
-    result = process_image(file_path)
+    file_path = "images/Engg1300/2520555.pdf"  # Replace with your test image
+    result = process_pdf(file_path)
     if result:
         print("Extracted Question and Answer:")
         pprint.pprint(result)
