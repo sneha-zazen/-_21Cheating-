@@ -3,7 +3,7 @@ import { themeColor, gradientBg, cardStyle } from "../styles";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-export default function LoginPage() {
+export default function LoginPage({ setCurrentUser }) {
   const [name, setName] = useState("");
   const navigate = useNavigate();
 
@@ -20,6 +20,7 @@ export default function LoginPage() {
       .then((response) => {
         if (response.data.success) {
           console.log(response);
+          setCurrentUser(response.data.data.userid);
           navigate(`/home/${response.data.data.userid}`);
         } else {
           console.log(response);
@@ -33,6 +34,7 @@ export default function LoginPage() {
           })
           .then((response) => {
             if (response.data.success) {
+              setCurrentUser(response.data.data.userid);
               navigate(`/home/${response.data.data.userid}`);
             }
           })

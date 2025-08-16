@@ -7,127 +7,119 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import UserInfoPage from "./pages/userpage";
 import { useNavigate } from "react-router-dom";
 
-function Header() {
-  const navigate = useNavigate();
-  const [page, setPage] = useState("home");
+export default function App() {
+  const [currentUser, setCurrentUser] = useState(null);
 
-  return (
-    <header
-      style={{
-        width: "100%",
-        padding: "24px 0",
-        background: themeColor,
-        color: "#fff",
-        textAlign: "center",
-        fontSize: 28,
-        fontWeight: 700,
-        letterSpacing: 2,
-        boxShadow: `0 2px 8px ${themeColor}22`,
-        position: "relative",
-      }}
-    >
-      <div
+  function Header() {
+    const navigate = useNavigate();
+
+    return (
+      <header
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          width: "100%",
+          padding: "24px 0",
+          background: themeColor,
+          color: "#fff",
+          textAlign: "center",
+          fontSize: 28,
+          fontWeight: 700,
+          letterSpacing: 2,
+          boxShadow: `0 2px 8px ${themeColor}22`,
+          position: "relative",
         }}
       >
-        <span style={{ flex: 1 }}>MCQ Study Assistant</span>
-        <nav
+        <div
           style={{
-            position: "absolute",
-            right: 32,
-            top: 24,
             display: "flex",
-            gap: 12,
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <button
-            onClick={() => navigate("/home/1")}
+          <span style={{ flex: 1 }}>MCQ Study Assistant</span>
+          <nav
             style={{
-              background: "transparent",
-              color: "#fff",
-              border: "none",
-              borderRadius: 6,
-              padding: "8px 18px",
-              fontWeight: 600,
-              fontSize: 16,
-              cursor: "pointer",
-              boxShadow: "none",
-              transition: "background 0.2s",
+              position: "absolute",
+              right: 32,
+              top: 24,
+              display: "flex",
+              gap: 12,
             }}
           >
-            Home
-          </button>
-          <button
-            onClick={() => navigate("/report/1")}
-            style={{
-              background: "transparent",
-              color: "#fff",
-              border: "none",
-              borderRadius: 6,
-              padding: "8px 18px",
-              fontWeight: 600,
-              fontSize: 16,
-              cursor: "pointer",
-              boxShadow: "none",
-              transition: "background 0.2s",
-            }}
-          >
-            Report
-          </button>
-          <button
-            onClick={() => navigate("/user/1")}
-            style={{
-              background: "transparent",
-              color: "#fff",
-              border: "none",
-              borderRadius: 1,
-              padding: "8px 18px",
-              fontWeight: 600,
-              fontSize: 16,
-              cursor: "pointer",
-              boxShadow: "none",
-              transition: "background 0.2s",
-            }}
-          >
-            User
-          </button>
-          <button
-            onClick={() => navigate("/")}
-            style={{
-              background: "transparent",
-              color: "#fff",
-              border: "none",
-              borderRadius: 6,
-              padding: "8px 18px",
-              fontWeight: 600,
-              fontSize: 16,
-              cursor: "pointer",
-              boxShadow: "none",
-              transition: "background 0.2s",
-            }}
-          >
-            Log in
-          </button>
-        </nav>
-      </div>
-    </header>
-  );
-}
+            <button
+              onClick={() => navigate(`/home/${currentUser?.userid || 1}`)}
+              style={{
+                background: "transparent",
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
+                padding: "8px 18px",
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: "pointer",
+                boxShadow: "none",
+                transition: "background 0.2s",
+              }}
+            >
+              Home
+            </button>
+            <button
+              onClick={() => navigate(`/user/${currentUser?.userid || 1}`)}
+              style={{
+                background: "transparent",
+                color: "#fff",
+                border: "none",
+                borderRadius: 1,
+                padding: "8px 18px",
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: "pointer",
+                boxShadow: "none",
+                transition: "background 0.2s",
+              }}
+            >
+              User
+            </button>
+            <button
+              onClick={() => navigate(`/`)}
+              style={{
+                background: "transparent",
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
+                padding: "8px 18px",
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: "pointer",
+                boxShadow: "none",
+                transition: "background 0.2s",
+              }}
+            >
+              Log in
+            </button>
+          </nav>
+        </div>
+      </header>
+    );
+  }
 
-export default function App() {
-  const [page, setPage] = useState("home");
   // Pass setPage to Header and all pages
   return (
     <BrowserRouter>
       <Header />
       <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/home/:userid" element={<HomePage />} />
-        <Route path="/report/:sessionid" element={<ReportPage />} />
-        <Route path="/user/:userid" element={<UserInfoPage />} />
+        <Route
+          path="/"
+          element={<LoginPage setCurrentUser={setCurrentUser} />}
+        />
+        <Route path="/home" element={<HomePage currentUser={currentUser} />} />
+        <Route
+          path="/report/:sessionid"
+          element={<ReportPage currentUser={currentUser} />}
+        />
+        <Route
+          path="/user"
+          element={<UserInfoPage currentUser={currentUser} />}
+        />
       </Routes>
     </BrowserRouter>
   );

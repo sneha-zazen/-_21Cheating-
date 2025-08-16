@@ -9,8 +9,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
-export default function HomePage() {
-  const { userid } = useParams();
+export default function HomePage({ currentUser }) {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -97,7 +96,7 @@ export default function HomePage() {
     setRunning(true);
     axios
       .post("http://localhost:5000/create_session", {
-        user_id: userid,
+        user_id: currentUser?.userid || 1,
         course_id: selectedCourse,
         paper_id: 1,
       })

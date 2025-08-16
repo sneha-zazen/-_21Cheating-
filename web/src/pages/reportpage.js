@@ -3,7 +3,7 @@ import { themeColor, gradientBg, cardStyle } from "../styles";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
-export default function ReportPage() {
+export default function ReportPage({ currentUser }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState({
