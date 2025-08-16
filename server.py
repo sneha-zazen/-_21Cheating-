@@ -4,6 +4,7 @@ import os
 from werkzeug.utils import secure_filename
 from model import process_image
 from flask_cors import CORS
+import datetime
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -64,6 +65,8 @@ def init_db():
             paper_id INTEGER,
             active INTEGER DEFAULT 1,
             hint_count INTEGER DEFAULT 0,
+            score INTEGER DEFAULT 0,
+            date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (course_id) REFERENCES courses (id),
             FOREIGN KEY (user_id) REFERENCES users (id),
             FOREIGN KEY (paper_id) REFERENCES papers (id)
@@ -216,8 +219,8 @@ def get_courses():
 
     return jsonify({"data": data, "success": True}), 200
 
-@app.route("/make_session", methods=["POST"])
-def make_session():
+@app.route("/create_session", methods=["POST"])
+def create_session():
     if not request.is_json:
         return jsonify({"error": "Request must be JSON"}), 400
 
@@ -229,6 +232,17 @@ def make_session():
               (data["course_id"], data["user_id"], data["paper_id"]))
     conn.commit()
     conn.close()
+    session_id = c.lastrowid
+    data = {
+        "session_id": session_id,
+        "course_id": data["course_id"],
+        "user_id": data["user_id"],
+        "paper_id": data["paper_id"],
+        "active": 1,
+        "hint_count": 0,
+        "score": 0,
+        "date_created": datetime.now().strftime("%Y-%m-%d %H:%M:%S")    
+    }
 
     return jsonify({"message": "Session created successfully", "data": data, "success": True}), 201
 
@@ -253,7 +267,9 @@ def get_session():
             "user_id": session[2],
             "paper_id": session[3],
             "active": session[4],
-            "hint_count": session[5]
+            "hint_count": session[5],
+            "score": session[6],
+            "date_created": session[7]
         },
         "answers": [{"id": answer[0], "response": answer[3]} for answer in answers]
     }
