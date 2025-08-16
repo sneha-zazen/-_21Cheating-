@@ -75,7 +75,10 @@ export default function HomePage() {
         })
         .then((response) => {
           if (response.data.success) {
-            setCourses((prev) => [...prev, inputValue]);
+            setCourses((prev) => [
+              ...prev,
+              { code: inputValue, name: inputValue },
+            ]);
             setSelectedCourse(inputValue);
             setInputValue("");
             setShowDropdown(false);

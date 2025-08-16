@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { themeColor, gradientBg, cardStyle } from "../styles";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
 export default function ReportPage() {
   const navigate = useNavigate();
-  const [loading, setLoading] = React.useState(false);
-  const [reportData, setReportData] = React.useState({
+  const [loading, setLoading] = useState(true);
+  const [reportData, setReportData] = useState({
     left: ["Item 1", "Item 2", "Item 3"],
     right: ["Item A", "Item B", "Item C"],
   });
-  const [score, setScore] = React.useState(85); // Example score
 
   const { sessionid } = useParams();
 
@@ -18,7 +18,28 @@ export default function ReportPage() {
     // Navigate back to home page
   };
 
-  return (
+  useEffect(() => {
+    // Fetch report data from backend
+    axios
+      .get(`http://localhost:5000/get_session`, {
+        params: { session_id: sessionid },
+      })
+      .then((response) => {
+        if (response.data.success) {
+          setReportData(response.data.data);
+          setLoading(false);
+        } else {
+          console.error("Failed to fetch report data:", response.data.error);
+        }
+      })
+      .catch((error) => {
+        console.error("There was an error fetching report data!", error);
+      });
+  }, [sessionid]);
+
+  return loading ? (
+    <>Loading...</>
+  ) : (
     <div style={gradientBg}>
       <div style={cardStyle}>
         <h1
@@ -44,7 +65,7 @@ export default function ReportPage() {
           <span role="img" aria-label="score" style={{ marginRight: 8 }}>
             🏆
           </span>
-          Score: {score}
+          Score: {reportData.session.score || "N/A"}
         </div>
         <div
           style={{
@@ -68,9 +89,9 @@ export default function ReportPage() {
               Column 1
             </strong>
             <ul style={{ marginTop: 12 }}>
-              {reportData.left.map((item, idx) => (
+              {reportData.answers.map((answer, idx) => (
                 <li key={idx} style={{ marginBottom: 8 }}>
-                  {item}
+                  {answer.response || "No response"}
                 </li>
               ))}
             </ul>
@@ -80,7 +101,7 @@ export default function ReportPage() {
               Column 2
             </strong>
             <ul style={{ marginTop: 12 }}>
-              {reportData.right.map((item, idx) => (
+              {[1, 2, 3].map((item, idx) => (
                 <li key={idx} style={{ marginBottom: 8 }}>
                   {item}
                 </li>

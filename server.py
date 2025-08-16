@@ -251,16 +251,32 @@ def create_session():
 @app.route("/get_session", methods=["GET"])
 def get_session():
     session_id = request.args.get("session_id")
+    
+    print("Received session ID:", session_id)
     if not session_id:
         return jsonify({"error": "Session ID is required"}), 400
 
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
-    c.execute("SELECT * FROM sessions WHERE id = ?", (session_id,))
-    c.execute("SELECT * FROM session_answers WHERE session_id = ?", (session_id,))
-    session = c.fetchone()
-    answers = c.fetchall()
+    try:
+        c.execute("SELECT * FROM sessions WHERE id = ?", (session_id,))
+        c.execute("SELECT * FROM session_answers WHERE session_id = ?", (session_id,))
+        session = c.fetchone()
+        answers = c.fetchall()
+        questions = []
+        for answer in answers:
+            c.execute("SELECT * FROM questions WHERE id = ?", (answer[2],))
+            question = c.fetchone()
+            questions.append({
+                "question_text": question[1] if question else None,
+                "correct_answer": question[2] if question else None,
+                "response": answer[3]
+            })
+    except sqlite3.Error as e:
+        conn.close()
+        return jsonify({"error": str(e), "success": False}), 500
     conn.close()
+
 
     data = {
         "session": {
@@ -274,7 +290,7 @@ def get_session():
             "date_created": session[7],
             "date_finished": session[8] if session[8] else None
         },
-        "answers": [{"id": answer[0], "response": answer[3]} for answer in answers]
+        "questions": questions
     }
 
     if session:
