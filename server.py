@@ -1,0 +1,382 @@
+from flask import Flask, request, jsonify
+import sqlite3
+import os
+from werkzeug.utils import secure_filename
+from model import process_image
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
+# Configure user folder
+USERS_FOLDER = "users"
+os.makedirs(USERS_FOLDER, exist_ok=True)
+app.config["USERS_FOLDER"] = USERS_FOLDER
+
+COURSES_FOLDER = "courses"
+os.makedirs(COURSES_FOLDER, exist_ok=True)
+app.config["COURSES_FOLDER"] = COURSES_FOLDER
+
+SESSION_FOLDER = "sessions"
+os.makedirs(SESSION_FOLDER, exist_ok=True)
+app.config["SESSION_FOLDER"] = SESSION_FOLDER
+
+PAPERS_FOLDER = "papers"
+os.makedirs(PAPERS_FOLDER, exist_ok=True)
+app.config["PAPERS_FOLDER"] = PAPERS_FOLDER
+
+SESSION_ANSWER_FOLDER = "session_answers"
+os.makedirs(SESSION_ANSWER_FOLDER, exist_ok=True)
+app.config["SESSION_ANSWER_FOLDER"] = SESSION_ANSWER_FOLDER
+
+QUESTIONS_FOLDER = "questions"
+os.makedirs(QUESTIONS_FOLDER, exist_ok=True)
+app.config["QUESTIONS_FOLDER"] = QUESTIONS_FOLDER
+
+# Initialize SQLite DB
+def init_db():
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("DROP TABLE IF EXISTS users")
+    c.execute("DROP TABLE IF EXISTS courses")
+    c.execute("DROP TABLE IF EXISTS sessions")
+    c.execute("DROP TABLE IF EXISTS papers")
+    c.execute("DROP TABLE IF EXISTS session_answers")
+    c.execute("DROP TABLE IF EXISTS questions")
+    
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS courses (
+            code TEXT PRIMARY KEY,
+            name TEXT NOT NULL
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER,
+            user_id INTEGER,
+            paper_id INTEGER,
+            active INTEGER DEFAULT 1,
+            hint_count INTEGER DEFAULT 0,
+            FOREIGN KEY (course_id) REFERENCES courses (id),
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (paper_id) REFERENCES papers (id)
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS papers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            year INTEGER NOT NULL,
+            course_id INTEGER,
+            FOREIGN KEY (course_id) REFERENCES courses (id)
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS session_answers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id INTEGER,
+            question_id INTEGER,
+            response TEXT,
+            FOREIGN KEY (session_id) REFERENCES sessions (id),
+            FOREIGN KEY (question_id) REFERENCES questions (id)
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS questions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            question_text TEXT NOT NULL,
+            correct_answer TEXT NOT NULL,
+            paper_id INTEGER,
+            FOREIGN KEY (paper_id) REFERENCES papers (id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# Endpoint 1: Upload image and return JSON response
+@app.route("/process_image", methods=["POST"])
+def process_image_endpoint():
+    if "image" not in request.files:
+        return jsonify({"error": "No image file provided"}), 400
+    if "session_id" not in request.form:
+        return jsonify({"error": "Session ID is required"}), 400
+    
+    image = request.files["image"]
+    if image.filename == "":
+        return jsonify({"error": "Empty filename"}), 400
+
+    # Process the image using the model
+    result = process_image(image)
+    
+    if not result:
+        return jsonify({"error": "No question or answer found in the image"}), 400
+    
+    # Save the result to the database
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO session_answers (session_id, question_id, response) VALUES (?, ?, ?)", 
+              (request.form["session_id"], result["question"], result["response"]))
+    conn.commit()
+    conn.close()
+
+    # TODO: Search database for the question and answer
+
+    if result:
+        return jsonify({"message": "Image processed successfully", "data": result})
+    else:
+        return jsonify({"error": "Failed to process image"}), 500
+
+# Endpoint 2: Save JSON into SQLite
+@app.route("/create_user", methods=["POST"])
+def create_user():
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+
+    data = request.get_json()
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO users (username) VALUES (?)", (data["username"],))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "JSON saved successfully", "data": data})
+
+@app.route("/get_user", methods=["GET"])
+def get_user():
+    username = request.args.get("username")
+    if not username:
+        return jsonify({"error": "Username is required"}), 400
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE username = ?", (username,))
+    user = c.fetchone()
+    conn.close()
+
+    if user:
+        return jsonify({"user": {"username": user[0]}})
+    else:
+        return jsonify({"error": "User not found"}), 404
+    
+@app.route("/get_courses", methods=["GET"])
+def get_courses():
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM courses")
+    courses = c.fetchall()
+    conn.close()
+
+    return jsonify({"courses": [{"code": course[0], "name": course[1]} for course in courses]})
+
+@app.route("/make_session", methods=["POST"])
+def make_session():
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+
+    data = request.get_json()
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO sessions (course_id, user_id, paper_id) VALUES (?, ?, ?)", 
+              (data["course_id"], data["user_id"], data["paper_id"]))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Session created successfully", "data": data})
+
+@app.route("/get_session", methods=["GET"])
+def get_session():
+    session_id = request.args.get("session_id")
+    if not session_id:
+        return jsonify({"error": "Session ID is required"}), 400
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM sessions WHERE id = ?", (session_id,))
+    c.execute("SELECT * FROM session_answers WHERE session_id = ?", (session_id,))
+    session = c.fetchone()
+    answers = c.fetchall()
+    conn.close()
+
+    if session:
+        return jsonify({"session": session, "answers": answers})
+    else:
+        return jsonify({"error": "Session not found"}), 404
+
+@app.route("/upload_paper", methods=["POST"])
+def upload_paper():
+    if "paper" not in request.files:
+        return jsonify({"error": "No paper file provided"}), 400
+    
+    if "course_id" not in request.form:
+        return jsonify({"error": "Course ID is required"}), 400
+    
+    paper = request.files["paper"]
+    if paper.filename == "":
+        return jsonify({"error": "Empty filename"}), 400
+
+    filename = secure_filename(paper.filename)
+    file_path = os.path.join(PAPERS_FOLDER, filename)
+    paper.save(file_path)
+
+    #TODO: Add AI processing to extract questions and answers from the paper
+
+    # Save paper metadata to database
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO papers (year, course_id) VALUES (?, ?)", (2023, request.form["course_id"]))
+    conn.commit()
+    conn.close()
+
+@app.route("/create_course", methods=["POST"])
+def create_course():
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+
+    data = request.get_json()
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO courses (name, code) VALUES (?, ?)", (data["name"], data["code"]))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"message": "Course created successfully", "data": data})
+
+@app.route("/get_user_sessions", methods=["GET"])
+def get_user_sessions():
+    username = request.args.get("username")
+    if not username:
+        return jsonify({"error": "Username is required"}), 400
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE username = ?", (username,))
+    user = c.fetchone()
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    user_id = user[0]
+    c.execute("SELECT * FROM sessions WHERE user_id = ?", (user_id,))
+    sessions = c.fetchall()
+    conn.close()
+
+    return jsonify({"sessions": sessions})
+
+@app.route("/get_session_answers", methods=["GET"])
+def get_session_answers():
+    session_id = request.args.get("session_id")
+    if not session_id:
+        return jsonify({"error": "Session ID is required"}), 400
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM session_answers WHERE session_id = ?", (session_id,))
+    answers = c.fetchall()
+    conn.close()
+
+    if answers:
+        return jsonify({"answers": answers})
+    else:
+        return jsonify({"error": "No answers found for this session"}), 404
+    
+@app.route("/get_course_papers", methods=["GET"])
+def get_course_papers():
+    course_id = request.args.get("course_id")
+    if not course_id:
+        return jsonify({"error": "Course ID is required"}), 400
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM papers WHERE course_id = ?", (course_id,))
+    papers = c.fetchall()
+    conn.close()
+
+    if papers:
+        return jsonify({"papers": papers})
+    else:
+        return jsonify({"error": "No papers found for this course"}), 404
+    
+@app.route("/get_paper_questions", methods=["GET"])
+def get_paper_questions():
+    paper_id = request.args.get("paper_id")
+    if not paper_id:
+        return jsonify({"error": "Paper ID is required"}), 400
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM questions WHERE paper_id = ?", (paper_id,))
+    questions = c.fetchall()
+    conn.close()
+
+    if questions:
+        return jsonify({"questions": questions})
+    else:
+        return jsonify({"error": "No questions found for this paper"}), 404
+    
+@app.route("/end_session", methods=["POST"])
+def end_session():
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+
+    data = request.get_json()
+    session_id = data.get("session_id")
+    
+    if not session_id:
+        return jsonify({"error": "Session ID is required"}), 400
+
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("UPDATE sessions SET active = 0 WHERE id = ?", (session_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Session ended successfully", "session_id": session_id})
+
+@app.route("/ping", methods=["GET"])
+def ping():
+    return jsonify({"message": "Server is running"}), 200
+
+@app.route("/get_hint", methods=["GET"])
+def get_hint():
+    question_id = request.args.get("question_id")
+    if not question_id:
+        return jsonify({"error": "Question ID is required"}), 400
+
+    session_id = request.args.get("session_id")
+    if not session_id:
+        return jsonify({"error": "Session ID is required"}), 400
+    
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("SELECT correct_answer FROM questions WHERE id = ?", (question_id,))
+    c.execute("SELECT response FROM session_answers WHERE session_id = ? AND question_id = ?", (session_id, question_id))
+    
+    correct_answer = c.fetchone()
+    response = c.fetchone()
+
+    conn.close()
+
+    if correct_answer == response:
+        return jsonify({"hint": "You have already answered this question correctly."}), 200
+    elif correct_answer:
+        # TODO: Implement logic to provide a hint based on the correct answer
+        return jsonify({"hint": f"The correct answer is: {correct_answer[0]}"}), 200
+
+    return jsonify({"error": "No correct answer found for this question"}), 404
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+

@@ -6,9 +6,9 @@ from matplotlib import pyplot as plt
 
 def preprocess_image(image_path):
     img = cv.imread(image_path,cv.IMREAD_GRAYSCALE)
-    img = cv.medianBlur(img,3)
+    # img = cv.medianBlur(img,3)
     threshold = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_GAUSSIAN_C,\
-                cv.THRESH_BINARY,19,2)
+                cv.THRESH_BINARY,11,2)
 
     cv.imshow('thresh', threshold)
     cv.waitKey()
@@ -45,7 +45,7 @@ def otsu_threshold(image_path):
 
 
 
-image_path = r"capture.jpg"
+image_path = r"image.png"
 
-# preprocess_image(image_path)
+preprocess_image(image_path)
 otsu_threshold(image_path)
