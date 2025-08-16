@@ -6,7 +6,7 @@ from model import process_image
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 # Configure user folder
 USERS_FOLDER = "users"
@@ -47,7 +47,7 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT
+            username TEXT NOT NULL UNIQUE
         )
     ''')
     c.execute('''
@@ -130,7 +130,7 @@ def process_image_endpoint():
     # TODO: Search database for the question and answer
 
     if result:
-        return jsonify({"message": "Image processed successfully", "data": result})
+        return jsonify({"message": "Image processed successfully", "data": result, "success": True}), 200
     else:
         return jsonify({"error": "Failed to process image"}), 500
 
@@ -141,32 +141,67 @@ def create_user():
         return jsonify({"error": "Request must be JSON"}), 400
 
     data = request.get_json()
+    print("Received data:", data)
 
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
-    c.execute("INSERT INTO users (username) VALUES (?)", (data["username"],))
-    conn.commit()
+    try:
+        c.execute("INSERT INTO users (username) VALUES (?)", (data["username"],))
+        userid = c.lastrowid
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({"error": "Username already exists"}), 400
     conn.close()
+    
+    response = {
+        "message": "User created successfully",
+        "data": {
+            "userid": userid,
+        },
+        "success": True
+    }
 
-    return jsonify({"message": "JSON saved successfully", "data": data})
+    return jsonify(response), 201
 
 @app.route("/get_user", methods=["GET"])
 def get_user():
+    userid = request.args.get("userid")
     username = request.args.get("username")
-    if not username:
-        return jsonify({"error": "Username is required"}), 400
+    if not userid and not username:
+        return jsonify({"error": "User ID or username is required"}), 400
+    
+    print("Received user ID:", userid)
+
 
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE username = ?", (username,))
-    user = c.fetchone()
+    try:
+        if userid:
+            c.execute("SELECT * FROM users WHERE user_id = ?", (userid,))
+        else:
+            c.execute("SELECT * FROM users WHERE username = ?", (username,))
+        user = c.fetchone()
+        if not user:
+            conn.close()
+            return jsonify({"error": "User not found", "success": False}), 404
+    except sqlite3.Error as e:
+        conn.close()
+        return jsonify({"error": str(e), "success": False}), 500
     conn.close()
 
+    if not user:
+        return jsonify({"error": "User not found", "success": False}), 404
+    data = {
+        "username": user[1] if user else None,
+        "userid": user[0] if user else None,
+    }
+
     if user:
-        return jsonify({"user": {"username": user[0]}})
+        return jsonify({"data": data, "success": True}), 200
     else:
-        return jsonify({"error": "User not found"}), 404
-    
+        return jsonify({"error": "User not found", "success": False}), 404
+
 @app.route("/get_courses", methods=["GET"])
 def get_courses():
     conn = sqlite3.connect("data.db")
@@ -175,7 +210,11 @@ def get_courses():
     courses = c.fetchall()
     conn.close()
 
-    return jsonify({"courses": [{"code": course[0], "name": course[1]} for course in courses]})
+    data = {
+        "courses": [{"code": course[0], "name": course[1]} for course in courses]
+    }
+
+    return jsonify({"data": data, "success": True}), 200
 
 @app.route("/make_session", methods=["POST"])
 def make_session():
@@ -191,7 +230,7 @@ def make_session():
     conn.commit()
     conn.close()
 
-    return jsonify({"message": "Session created successfully", "data": data})
+    return jsonify({"message": "Session created successfully", "data": data, "success": True}), 201
 
 @app.route("/get_session", methods=["GET"])
 def get_session():
@@ -207,22 +246,34 @@ def get_session():
     answers = c.fetchall()
     conn.close()
 
+    data = {
+        "session": {
+            "id": session[0],
+            "course_id": session[1],
+            "user_id": session[2],
+            "paper_id": session[3],
+            "active": session[4],
+            "hint_count": session[5]
+        },
+        "answers": [{"id": answer[0], "response": answer[3]} for answer in answers]
+    }
+
     if session:
-        return jsonify({"session": session, "answers": answers})
+        return jsonify({"data": data, "success": True}), 200
     else:
-        return jsonify({"error": "Session not found"}), 404
+        return jsonify({"error": "Session not found", "success": False}), 404
 
 @app.route("/upload_paper", methods=["POST"])
 def upload_paper():
     if "paper" not in request.files:
-        return jsonify({"error": "No paper file provided"}), 400
-    
+        return jsonify({"error": "No paper file provided", "success": False}), 400
+
     if "course_id" not in request.form:
-        return jsonify({"error": "Course ID is required"}), 400
-    
+        return jsonify({"error": "Course ID is required", "success": False}), 400
+
     paper = request.files["paper"]
     if paper.filename == "":
-        return jsonify({"error": "Empty filename"}), 400
+        return jsonify({"error": "Empty filename", "success": False}), 400
 
     filename = secure_filename(paper.filename)
     file_path = os.path.join(PAPERS_FOLDER, filename)
@@ -236,11 +287,13 @@ def upload_paper():
     c.execute("INSERT INTO papers (year, course_id) VALUES (?, ?)", (2023, request.form["course_id"]))
     conn.commit()
     conn.close()
+    
+    return jsonify({"message": "Paper uploaded successfully", "success": True}), 201
 
 @app.route("/create_course", methods=["POST"])
 def create_course():
     if not request.is_json:
-        return jsonify({"error": "Request must be JSON"}), 400
+        return jsonify({"error": "Request must be JSON", "success": False}), 400
 
     data = request.get_json()
 
@@ -250,29 +303,29 @@ def create_course():
     
     conn.commit()
     conn.close()
-    
-    return jsonify({"message": "Course created successfully", "data": data})
+
+    return jsonify({"message": "Course created successfully", "data": data, "success": True}), 201
 
 @app.route("/get_user_sessions", methods=["GET"])
 def get_user_sessions():
-    username = request.args.get("username")
-    if not username:
-        return jsonify({"error": "Username is required"}), 400
+    userid = request.args.get("userid")
+    if not userid:
+        return jsonify({"error": "User ID is required"}), 400
 
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
-    c.execute("SELECT id FROM users WHERE username = ?", (username,))
+    c.execute("SELECT id FROM users WHERE user_id = ?", (userid,))
     user = c.fetchone()
 
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"error": "User not found", "success": False}), 404
 
     user_id = user[0]
     c.execute("SELECT * FROM sessions WHERE user_id = ?", (user_id,))
     sessions = c.fetchall()
     conn.close()
 
-    return jsonify({"sessions": sessions})
+    return jsonify({"sessions": sessions, "success": True}), 200
 
 @app.route("/get_session_answers", methods=["GET"])
 def get_session_answers():
@@ -287,15 +340,15 @@ def get_session_answers():
     conn.close()
 
     if answers:
-        return jsonify({"answers": answers})
+        return jsonify({"answers": answers, "success": True}), 200
     else:
-        return jsonify({"error": "No answers found for this session"}), 404
-    
+        return jsonify({"error": "No answers found for this session", "success": False}), 404
+
 @app.route("/get_course_papers", methods=["GET"])
 def get_course_papers():
     course_id = request.args.get("course_id")
     if not course_id:
-        return jsonify({"error": "Course ID is required"}), 400
+        return jsonify({"error": "Course ID is required", "success": False}), 400
 
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
@@ -303,11 +356,15 @@ def get_course_papers():
     papers = c.fetchall()
     conn.close()
 
+    data = {
+        "papers": [{"id": paper[0], "year": paper[1], "course_id": paper[2]} for paper in papers]
+    }
+
     if papers:
-        return jsonify({"papers": papers})
+        return jsonify({"data": data, "success": True}), 200
     else:
-        return jsonify({"error": "No papers found for this course"}), 404
-    
+        return jsonify({"error": "No papers found for this course", "success": False}), 404
+
 @app.route("/get_paper_questions", methods=["GET"])
 def get_paper_questions():
     paper_id = request.args.get("paper_id")
@@ -320,15 +377,19 @@ def get_paper_questions():
     questions = c.fetchall()
     conn.close()
 
+    data = {
+        "questions": [{"id": question[0], "question_text": question[1], "correct_answer": question[2]} for question in questions]
+    }
+
     if questions:
-        return jsonify({"questions": questions})
+        return jsonify({"data": data, "success": True}), 200
     else:
-        return jsonify({"error": "No questions found for this paper"}), 404
+        return jsonify({"error": "No questions found for this paper", "success": False}), 404
     
 @app.route("/end_session", methods=["POST"])
 def end_session():
     if not request.is_json:
-        return jsonify({"error": "Request must be JSON"}), 400
+        return jsonify({"error": "Request must be JSON", "success": False}), 400
 
     data = request.get_json()
     session_id = data.get("session_id")
@@ -342,11 +403,15 @@ def end_session():
     conn.commit()
     conn.close()
 
-    return jsonify({"message": "Session ended successfully", "session_id": session_id})
+    data = {
+        "session_id": session_id,
+    }
+
+    return jsonify({"message": "Session ended successfully", "data": data, "success": True}), 200
 
 @app.route("/ping", methods=["GET"])
 def ping():
-    return jsonify({"message": "Server is running"}), 200
+    return jsonify({"message": "Server is running", "success": True}), 200
 
 @app.route("/get_hint", methods=["GET"])
 def get_hint():
@@ -367,14 +432,27 @@ def get_hint():
     response = c.fetchone()
 
     conn.close()
+    
 
     if correct_answer == response:
-        return jsonify({"hint": "You have already answered this question correctly."}), 200
-    elif correct_answer:
-        # TODO: Implement logic to provide a hint based on the correct answer
-        return jsonify({"hint": f"The correct answer is: {correct_answer[0]}"}), 200
+        data = {
+            "question_id": question_id,
+            "session_id": session_id,
+            "hint": "You have already answered this question correctly."
+        }
 
-    return jsonify({"error": "No correct answer found for this question"}), 404
+        return jsonify({"data": data, "success": True}), 200
+    elif correct_answer:
+        
+        data = {
+            "question_id": question_id,
+            "session_id": session_id,
+            "hint": f"The correct answer is: {correct_answer[0]}"
+        }
+        # TODO: Implement logic to provide a hint based on the correct answer
+        return jsonify({"data": data, "success": True}), 200
+
+    return jsonify({"error": "No correct answer found for this question", "success": False}), 404
 
 
 if __name__ == "__main__":

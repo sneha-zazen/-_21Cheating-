@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { themeColor, gradientBg, cardStyle } from "../styles";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function LoginPage() {
   const [name, setName] = useState("");
@@ -8,8 +9,37 @@ export default function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: add backend integration for user login
-    navigate("/home/1");
+    if (!name) {
+      alert("Please enter your name");
+      return;
+    }
+
+    axios
+      .post("http://10.89.249.11:5000/create_user", { username: name })
+      .then((response) => {
+        if (response.data.success) {
+          console.log(response);
+          navigate(`/home/${response.data.data.userid}`);
+        } else {
+          console.log(response);
+          alert("Failed to create user", response.data.error);
+        }
+      })
+      .catch((error) => {
+        axios
+          .get("http://localhost:5000/get_user", {
+            params: { username: name },
+          })
+          .then((response) => {
+            if (response.data.success) {
+              navigate(`/home/${response.data.data.userid}`);
+            }
+          })
+          .catch((error) => {
+            console.error("There was an error fetching the user!", error);
+            alert("Failed to fetch user data. Please try again.", error);
+          });
+      });
   };
 
   return (
