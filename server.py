@@ -171,14 +171,14 @@ def process_image_endpoint():
             "SELECT correct_answer FROM questions WHERE question_text = ?",
             (question["question"],)
         )
-        correct_answer = c.fetchone()[0]
+        correct_answer = c.fetchone()
         print("Correct answer:", correct_answer)
-        if correct_answer:
-            result[i]["correct_answer"] = correct_answer
+        if correct_answer and correct_answer[0]:
+            result[i]["correct_answer"] = correct_answer[0]
             result[i]["AI_response"] = False
         else:
             result[i]["AI_response"] = True
-        if correct_answer and question["response"] == correct_answer:
+        if correct_answer and question["response"] == correct_answer[0]:
             c.execute("UPDATE sessions SET score = score + 1 WHERE id = ?", (session_id,))
             result[i]["hint"] = "Correct answer!"
         else:
@@ -643,7 +643,7 @@ def get_user_stats():
     # count how many sessions users have completed
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
-    c.execute("SELECT users.user_id, COUNT(*), users.username FROM sessions JOIN users ON sessions.user_id = users.user_id WHERE sessions.active = 0 GROUP BY users.user_id")
+    c.execute("SELECT users.user_id, COUNT(*), users.username FROM sessions JOIN users ON sessions.user_id = users.user_id GROUP BY users.user_id")
     user_stats = c.fetchall()
     conn.close()
     data = {

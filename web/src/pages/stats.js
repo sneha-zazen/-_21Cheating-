@@ -19,6 +19,7 @@ export default function StatsPage() {
           axios.get("http://10.89.249.11:5000/get_courses"),
         ]);
 
+        console.log("Session stats:", statsRes.data);
         setSessionStats(statsRes.data.data.user_stats || []);
         setCourses(coursesRes.data.data.courses || []);
       } catch (error) {
@@ -33,17 +34,20 @@ export default function StatsPage() {
 
   const updateCourse = (courseId) => {
     setSelectedCourse(courseId);
-    axios
-      .get(`http://10.89.249.11:5000/get_question_frequencies`, {
-        params: { course_id: courseId },
-      })
-      .then((response) => {
-        console.log("Question frequencies:", response.data);
-        setQuestionFrequencies(response.data.data.question_frequencies || []);
-      })
-      .catch((error) => {
-        console.error("Error fetching question frequencies:", error);
-      });
+    setQuestionFrequencies([]); // Clear questions from the previous course
+    if (courseId) {
+      axios
+        .get(`http://localhost:5000/get_question_frequencies`, {
+          params: { course_id: courseId },
+        })
+        .then((response) => {
+          console.log("Question frequencies:", response.data);
+          setQuestionFrequencies(response.data.data.question_frequencies || []);
+        })
+        .catch((error) => {
+          console.error("Error fetching question frequencies:", error);
+        });
+    }
   };
 
   return loading ? (
@@ -116,6 +120,8 @@ export default function StatsPage() {
               border: `1px solid ${themeColor}55`,
               width: "220px",
               fontSize: 16,
+              color: "#333",
+              backgroundColor: "rgba(255,255,255,0.85)",
             }}
           >
             <option value="">Select a course</option>
@@ -149,10 +155,13 @@ export default function StatsPage() {
                     marginBottom: 8,
                     fontSize: 15,
                     color: "#333",
+                    padding: "8px 12px",
+                    borderBottom: "1px solid #eee",
+                    transition: "background-color 0.2s",
                   }}
                 >
                   {question.question_text} —{" "}
-                  <span style={{ color: themeColor }}>
+                  <span style={{ color: themeColor, fontWeight: "bold" }}>
                     {question.count} times
                   </span>
                 </li>

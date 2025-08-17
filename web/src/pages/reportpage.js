@@ -1,26 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { themeColor, gradientBg, cardStyle } from "../styles";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 export default function ReportPage({ currentUser }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [reportData, setReportData] = useState({
-    left: ["Item 1", "Item 2", "Item 3"],
-    right: ["Item A", "Item B", "Item C"],
-  });
-
+  const [reportData, setReportData] = useState(null);
   const { sessionid } = useParams();
 
-  const onGoBack = () => {
-    navigate("/");
-    // Navigate back to home page
-  };
+  const onGoBack = () => navigate("/");
 
   useEffect(() => {
-    // Fetch report data from backend
-
     axios
       .get(`http://10.89.249.11:5000/get_session`, {
         params: { session_id: sessionid },
@@ -29,7 +19,6 @@ export default function ReportPage({ currentUser }) {
         if (response.data.success) {
           setReportData(response.data.data);
           setLoading(false);
-          console.log("Report data fetched successfully:", response.data.data);
         } else {
           console.error("Failed to fetch report data:", response.data.error);
         }
@@ -39,94 +28,62 @@ export default function ReportPage({ currentUser }) {
       });
   }, [sessionid]);
 
-  return loading ? (
-    <>Loading...</>
-  ) : (
-    <div style={gradientBg}>
-      <div style={cardStyle}>
-        <h1
-          style={{
-            textAlign: "center",
-            marginBottom: 24,
-            fontWeight: 700,
-            letterSpacing: 1,
-            color: themeColor,
-          }}
-        >
-          Report
+  if (loading) return <div>Loading...</div>;
+
+  const { session, questions } = reportData;
+
+  return (
+    <div className="bg-light min-vh-100 py-5">
+      <div className="container card rounded-5 shadow-lg p-5">
+        <h1 className="text-center display-4 fw-bold mb-4 text-dark">
+          Report for {session.course_id} 📚
         </h1>
-        <div
-          style={{
-            marginBottom: 24,
-            textAlign: "center",
-            fontSize: 22,
-            fontWeight: 600,
-            color: themeColor,
-          }}
-        >
-          <span role="img" aria-label="score" style={{ marginRight: 8 }}>
-            🏆
-          </span>
-          Score: {reportData.session.score}
-        </div>
-        <div
-          style={{
-            display: "flex",
-            border: `1px solid ${themeColor}22`,
-            borderRadius: 12,
-            overflow: "hidden",
-            background: "rgba(250,250,250,0.95)",
-            boxShadow: `0 2px 8px ${themeColor}11`,
-          }}
-        >
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              borderRight: `1px solid ${themeColor}22`,
-              padding: 16,
-            }}
-          >
-            <strong style={{ color: themeColor, fontSize: 16 }}>
-              Column 1
-            </strong>
-            <ul style={{ marginTop: 12 }}>
-              {reportData.questions.map((question, idx) => (
-                <li key={idx} style={{ marginBottom: 8 }}>
-                  {question.question_text || "No question text available"}
-                </li>
-              ))}
-            </ul>
+        <div className="d-flex flex-wrap justify-content-center gap-4 mb-5 text-secondary fw-bold fs-5">
+          <div>
+            <strong>Score:</strong> {session.score}
           </div>
-          <div style={{ flex: 1, overflowY: "auto", padding: 16 }}>
-            <strong style={{ color: themeColor, fontSize: 16 }}>
-              Column 2
-            </strong>
-            <ul style={{ marginTop: 12 }}>
-              {[1, 2, 3].map((item, idx) => (
-                <li key={idx} style={{ marginBottom: 8 }}>
-                  {item}
-                </li>
-              ))}
-            </ul>
+          <div>
+            <strong>Hints Used:</strong> {session.hint_count}
+          </div>
+          <div>
+            <strong>Date Started:</strong> {session.date_created}
           </div>
         </div>
-        <div style={{ textAlign: "center", marginTop: 32 }}>
+        <div className="row g-4">
+          {questions.map((q, idx) => {
+            const isCorrect = q.response?.trim() === q.correct_answer?.trim();
+            const cardClass = isCorrect
+              ? "border-success bg-success-subtle"
+              : "border-danger bg-danger-subtle";
+            return (
+              <div key={idx} className="col-md-6">
+                <div
+                  className={`card h-100 p-4 rounded-4 shadow-sm ${cardClass}`}
+                >
+                  <h5 className="card-title fw-bold text-dark mb-3">
+                    Q{idx + 1}. {q.question_text}
+                  </h5>
+                  <div className="card-body bg-white rounded p-3 mb-2 shadow-sm">
+                    <p className="card-text fw-semibold mb-0">
+                      Your Answer: {q.response || "(no response)"}
+                    </p>
+                  </div>
+                  <div className="card-body bg-white rounded p-3 shadow-sm">
+                    <p className="card-text fw-semibold mb-0">
+                      Correct Answer: {q.correct_answer || "(not provided)"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="text-center mt-5">
           <button
             onClick={onGoBack}
-            style={{
-              padding: "10px 24px",
-              borderRadius: 8,
-              border: "none",
-              background: `linear-gradient(90deg, #a8edea 0%, ${themeColor} 100%)`,
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: 16,
-              cursor: "pointer",
-              boxShadow: `0 2px 8px ${themeColor}22`,
-            }}
+            className="btn btn-info btn-lg rounded-pill fw-bold text-white shadow-lg"
           >
-            Go Back to Home Page
+            ⬅ Go Back to Home Page
           </button>
         </div>
       </div>

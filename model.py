@@ -4,7 +4,7 @@ import pprint
 import json
 
 client = OpenAI()
-fine_tuned_model_id = "ftjob-E0S1WTEQoemxl55En23wzo9x"   # TODO replace with the fine-tuned model ID
+fine_tuned_model_id = "ft:gpt-4o-mini-2024-07-18:personal:recipe-ner:C5MzTgKB"   # TODO replace with the fine-tuned model ID
 
 PROMPT = """There is an attached image of an exam question with an answer circled. Your job 
 is to extract what the question is and what the user has answerd and what the answer should be. For example, if the image 
@@ -12,6 +12,7 @@ has a question "What is the capital of France?" with option "A) Paris", "B) Lond
 and the user has circled "A", you should return as a strictly formatted JSON object:
 [
 {
+    "question_number": 1,
     "question": "What is the capital of France?",
     "response": "Paris",
     "correct_answer": "Paris"
@@ -24,12 +25,17 @@ If the image contains multiple questions, return a list of question-response-ans
 question but no answer, return the question with an empty answer field:
 [
 {
+    "question_number": 1,
     "question": "What is the capital of France?",
     "response": "",
     "correct_answer": "Paris"
 }
 
-ONLY return the list of JSON object, do not include any other text or formatting.
+ONLY return the list of JSON object, do not include any other text or formatting. Be 
+sure to include any extra information that is relevant to the question, such as 
+whatever examples are given or any additional context that is provided in the image
+as part of the question. WHen you choose your answer it must be one of the options 
+given in the image, do not make up your own answer.
 """
 
 def process_paper(file_obj):
@@ -137,7 +143,7 @@ def process_image(image_file):
     
     response = client.chat.completions.create(
         model="gpt-4.1-mini",
-        # model = fine_tuned_model_id,
+        # model=fine_tuned_model_id,
         messages=[
             {
                 "role": "user",
