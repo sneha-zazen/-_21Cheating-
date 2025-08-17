@@ -9,25 +9,26 @@ PROMPT = """There is an attached image of an exam question with an answer circle
 is to extract what the question is and what the user has answerd and what the answer should be. For example, if the image 
 has a question "What is the capital of France?" with option "A) Paris", "B) London", "C) Berlin" 
 and the user has circled "A", you should return as a strictly formatted JSON object:
-
+[
 {
     "question": "What is the capital of France?",
     "response": "Paris",
     "correct_answer": "Paris"
 }
+]
 
-with no other text or formatting. If the image does not contain a question or answer, return an empty JSON object.
+with no other text or formatting. If the image does not contain a question or answer, return an empty list.
 It is important that you do not include the letters A, B, C, etc. in the answer, only the actual answer text.
 If the image contains multiple questions, return a list of question-response-answer objects. If the image contains a
 question but no answer, return the question with an empty answer field:
-
+[
 {
     "question": "What is the capital of France?",
     "response": "",
     "correct_answer": "Paris"
 }
 
-ONLY return the JSON object, do not include any other text or formatting.
+ONLY return the list of JSON object, do not include any other text or formatting.
 """
 
 def process_paper(file_obj):
@@ -100,24 +101,28 @@ def process_paper(file_obj):
 
 def process_image(image_file):
     """
-    Process an image file to extract question and answer. If the image contains a question and an answer, 
+    Process an image file to extract question and answer. If the image contains one or more questions with an answer, 
     it returns a dictionary object with fields "question" and "response". If the image does not contain a question or answer,
     it returns None. If the image contains a question but no answer, it returns the question with an empty response.
 
     e.g.
 
     Image contains question with circled answer:
-    {
-        "question": "What is the capital of France?",
-        "response": "Paris"
-    }
+    [
+        {
+            "question": "What is the capital of France?",
+            "response": "Paris"
+        }   
+    ]
 
 
     Image contains question but no circled answer:
-    {
-        "question": "What is the capital of France?",
-        "response": ""
-    }
+    [
+        {
+            "question": "What is the capital of France?",
+            "response": ""
+        }
+    ]
 
     Parameters:
     - file_path (str): The path to the image file.
@@ -152,6 +157,35 @@ def process_image(image_file):
         return result
     except json.JSONDecodeError:
         print("Failed to decode JSON response:", response_text)
+        
+def get_hint(question, response, correct_answer):
+    prompt = f"""
+    You are an AI assistant that provides hints for exam questions. Given a
+    question, the user's response, and the correct answer, provide a hint that
+    helps the user understand the correct answer without giving it away directly.
+    Question: {question}
+    User's Response: {response}
+    Correct Answer: {correct_answer}
+    
+    Provide a hint that is relevant to the question and helps the user arrive at
+    the correct answer. The hint should not be too obvious, but should guide the
+    user towards the correct answer. The hint should be concise and clear.
+    Your output should be a single sentence hint with no additional text
+    or formatting.
+    """
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt}
+                ],
+            }
+        ],
+    )
+    hint = response.choices[0].message.content.strip()
+    return hint
 
 
 if __name__ == "__main__":
