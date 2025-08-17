@@ -46,7 +46,7 @@ void setup() {
     // Tft.drawString("We do not condone cheating!", 20, 160, 2, WHITE, orientation); // 27, max 25?
     Tft.drawString("We DO not condone", 20, 160, 2, WHITE, orientation);
     Tft.drawString("cheating!", 20, 140, 2, WHITE, orientation);
-    Tft.drawString("PRESS SCREEN", 20, 120, 2, WHITE, orientation);
+    // Tft.drawString("PRESS SCREEN", 20, 120, 2, WHITE, orientation);
 
 }
 
@@ -68,6 +68,7 @@ void loop() {
             hintsList[hintCount] = sendMessage;
             hintCount += 1;
             sendMessage = "";
+            Tft.drawString("NEW INFO! PRESS SCREEN", 20, 20, 2, YELLOW, orientation);
         } else {
             sendMessage += input;
         }
