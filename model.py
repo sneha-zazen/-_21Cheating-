@@ -135,7 +135,7 @@ def process_image(image_file):
     image_b64 = base64.b64encode(image_bytes).decode("utf-8")  
     
     response = client.chat.completions.create(
-        model="gpt-4.1-mini",
+        model="ftjob-VnNl80LW2xpCd7XLDWKda8Tp",
         messages=[
             {
                 "role": "user",

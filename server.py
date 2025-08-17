@@ -119,6 +119,10 @@ def process_image_endpoint():
 
     if "image" not in data:
         return jsonify({"error": "No image provided"}), 400
+    
+    # confirm that the image is base64 encoded
+    # if not isinstance(data["image"], str) or not data["image"].startswith("data:image/png;base64,"):
+    #     return jsonify({"error": "Image must be base64 encoded"}), 400
 
     try:
         # Decode base64 image from JSON payload
@@ -160,23 +164,30 @@ def process_image_endpoint():
         if not question_id:
             c.execute(
                 "INSERT INTO questions (question_text, correct_answer) VALUES (?, ?)",
-                (question["question"], None)
+                (question["question"], "")
             )
             question_id = c.lastrowid
         c.execute(
             "SELECT correct_answer FROM questions WHERE question_text = ?",
             (question["question"],)
         )
-        correct_answer = c.fetchone()
+        correct_answer = c.fetchone()[0]
+        print("Correct answer:", correct_answer)
         if correct_answer:
-            result[i]["correct_answer"] = correct_answer[0]
+            result[i]["correct_answer"] = correct_answer
             result[i]["AI_response"] = False
         else:
             result[i]["AI_response"] = True
-        if correct_answer and question["response"] == correct_answer[0]:
+        if correct_answer and question["response"] == correct_answer:
             c.execute("UPDATE sessions SET score = score + 1 WHERE id = ?", (session_id,))
             result[i]["hint"] = "Correct answer!"
         else:
+            print("No correct answer found for question:", question["question"])
+            print("===")
+            print(item)
+            result[i]["correct_answer"] = item.get("correct_answer", "")
+            result[i]["AI_response"] = True
+            print("Updated correct answer:", result[i]["correct_answer"])
             result[i]["hint"] = get_hint(question["question"], question["response"], correct_answer[0] if correct_answer else None)
             c.execute("UPDATE sessions SET hint_count = hint_count + 1 WHERE id = ?", (session_id,))
             
