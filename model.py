@@ -45,7 +45,9 @@ def process_paper(file_obj):
     and a list of question answer pairs. Each question should be associated with its answer
     and the answer should be the text of the answer, not the option letter. On some 
     papers, the answer may be highlighted or circled. If no answer is highlighted,
-    return an empty string for the response. 
+    return an empty string for the response. Be sure to include any extra information 
+    that is relevant to the question, such as whatever examples are given or any
+    additional context that is provided in the image as part of the question.
     
     Return the extracted information as a JSON object with the following structure:
     {
