@@ -2,11 +2,12 @@ from flask import Flask, request, jsonify
 import sqlite3
 import os
 from werkzeug.utils import secure_filename
-from model import process_image, process_paper
+from model import process_image, process_paper, get_hint
 from flask_cors import CORS
 from datetime import datetime
 import base64
 from io import BytesIO
+import pprint
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -79,9 +80,9 @@ def init_db():
         CREATE TABLE IF NOT EXISTS papers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             year INTEGER NOT NULL,
-            course_id INTEGER,
+            course_id TEXT NOT NULL,
             type TEXT DEFAULT 'final',
-            FOREIGN KEY (course_id) REFERENCES courses (id)
+            FOREIGN KEY (course_id) REFERENCES courses (code)
         )
     ''')
     c.execute('''
@@ -90,6 +91,7 @@ def init_db():
             session_id INTEGER,
             question_id INTEGER,
             response TEXT,
+            hint_used INTEGER DEFAULT 0,
             FOREIGN KEY (session_id) REFERENCES sessions (id),
             FOREIGN KEY (question_id) REFERENCES questions (id)
         )
@@ -117,8 +119,6 @@ def process_image_endpoint():
 
     if "image" not in data:
         return jsonify({"error": "No image provided"}), 400
-    if "session_id" not in data:
-        return jsonify({"error": "Session ID is required"}), 400
 
     try:
         # Decode base64 image from JSON payload
@@ -140,18 +140,51 @@ def process_image_endpoint():
     
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
-    if type(result) is list:
-        for item in result:
-            c.execute(
-                "INSERT INTO session_answers (session_id, question_id, response) VALUES (?, ?, ?)",
-                (data["session_id"], item["question"], item["response"])
-            )
-    else:
+    c.execute("SELECT id FROM sessions WHERE active = 1")
+    session = c.fetchone()
+    if not session:
+        return jsonify({"error": "No active session found"}), 400
+    session_id = session[0]
+    
+    pprint.pprint(result)
+    
+   
+    for item in result:
         c.execute(
             "INSERT INTO session_answers (session_id, question_id, response) VALUES (?, ?, ?)",
-            (data["session_id"], result["question"], result["response"])
+            (session_id, item["question"], item["response"])
         )
+    for i, question in enumerate(result):
+        c.execute("SELECT id FROM questions WHERE question_text = ?", (question["question"],))
+        question_id = c.fetchone()
+        if not question_id:
+            c.execute(
+                "INSERT INTO questions (question_text, correct_answer) VALUES (?, ?)",
+                (question["question"], None)
+            )
+            question_id = c.lastrowid
+        c.execute(
+            "SELECT correct_answer FROM questions WHERE question_text = ?",
+            (question["question"],)
+        )
+        correct_answer = c.fetchone()
+        if correct_answer:
+            result[i]["correct_answer"] = correct_answer[0]
+            result[i]["AI_response"] = False
+        else:
+            result[i]["AI_response"] = True
+        if correct_answer and question["response"] == correct_answer[0]:
+            c.execute("UPDATE sessions SET score = score + 1 WHERE id = ?", (session_id,))
+            result[i]["hint"] = "Correct answer!"
+        else:
+            result[i]["hint"] = get_hint(question["question"], question["response"], correct_answer[0] if correct_answer else None)
+            c.execute("UPDATE sessions SET hint_count = hint_count + 1 WHERE id = ?", (session_id,))
+            
+
+    
     conn.commit()
+    
+    
     conn.close()
 
     return jsonify({"message": "Image processed successfully", "data": result, "success": True}), 200
@@ -286,8 +319,11 @@ def get_session():
         answers = c.fetchall()
         questions = []
         for answer in answers:
-            c.execute("SELECT * FROM questions WHERE id = ?", (answer[2],))
+            print("Fetching question for answer:", answer)
+            print("Query: SELECT * FROM questions WHERE question_text =", (answer[2],))
+            c.execute("SELECT * FROM questions WHERE question_text = ?", (answer[2],))
             question = c.fetchone()
+            print("Question:", question)
             questions.append({
                 "question_text": question[1] if question else None,
                 "correct_answer": question[2] if question else None,
@@ -370,7 +406,7 @@ def get_user_sessions():
 
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
-    c.execute("SELECT id FROM users WHERE user_id = ?", (userid,))
+    c.execute("SELECT user_id FROM users WHERE user_id = ?", (userid,))
     user = c.fetchone()
 
     if not user:
@@ -422,7 +458,18 @@ def process_paper_endpoint():
     
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
-    c.execute("SELECT id FROM courses WHERE code = ?", (result["course_code"],))
+    # check if the paper already exists
+    c.execute("SELECT id FROM papers WHERE year = ? AND course_id = ? AND type = ?", 
+              (result["year"], result["course_code"], result.get("type", "final")))
+    papers = c.fetchall()
+    if papers:
+        return jsonify({"error": "Paper already exists", "success": False}), 400
+    
+    existing_paper = c.fetchone()
+    if existing_paper:
+        return jsonify({"error": "Paper already exists", "success": False}), 400
+
+    c.execute("SELECT code FROM courses WHERE code = ?", (result["course_code"],))
     course = c.fetchone()
     if not course:
         c.execute("INSERT INTO courses (code, name) VALUES (?, ?)", (result["course_code"], "Course Name Placeholder"))
@@ -448,6 +495,11 @@ def get_session_answers():
     c = conn.cursor()
     c.execute("SELECT * FROM session_answers WHERE session_id = ?", (session_id,))
     answers = c.fetchall()
+    for answer in answers:
+        c.execute("SELECT question_text FROM questions WHERE id = ?", (answer[2],))
+        question = c.fetchone()
+        if question:
+            answer += (question[0],)
     conn.close()
 
     if answers:
@@ -525,24 +577,25 @@ def ping():
     return jsonify({"message": "Server is running", "success": True}), 200
 
 @app.route("/get_hint", methods=["GET"])
-def get_hint():
+def get_hint_endpoint():
     question_id = request.args.get("question_id")
     if not question_id:
         return jsonify({"error": "Question ID is required"}), 400
+ 
 
-    session_id = request.args.get("session_id")
-    if not session_id:
-        return jsonify({"error": "Session ID is required"}), 400
     
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
+    c.execute("SELECT session_id FROM sessions WHERE active = 1")
+    session = c.fetchone()
+    if not session:
+        return jsonify({"error": "No active session found"}), 400
+    session_id = session[0]
     c.execute("SELECT correct_answer FROM questions WHERE id = ?", (question_id,))
     c.execute("SELECT response FROM session_answers WHERE session_id = ? AND question_id = ?", (session_id, question_id))
     
     correct_answer = c.fetchone()
     response = c.fetchone()
-
-    conn.close()
     
 
     if correct_answer == response:
@@ -551,16 +604,24 @@ def get_hint():
             "session_id": session_id,
             "hint": "You have already answered this question correctly."
         }
+        c.execute("UPDATE sessions SET score = score + 1 WHERE id = ?", (session_id,))
+        
+        conn.commit()
 
         return jsonify({"data": data, "success": True}), 200
     elif correct_answer:
         
+        hint = get_hint(question_id, response[0], correct_answer[0])
         data = {
             "question_id": question_id,
             "session_id": session_id,
-            "hint": f"The correct answer is: {correct_answer[0]}"
+            "hint": hint
         }
-        # TODO: Implement logic to provide a hint based on the correct answer
+
+        c.execute("UPDATE sessions SET hint_count = hint_count + 1 WHERE id = ?", (session_id,))
+        c.execute("UPDATE session_answers SET hint_used = 1 WHERE session_id = ? AND question_id = ?", (session_id, question_id))
+        conn.commit()
+    
         return jsonify({"data": data, "success": True}), 200
 
     return jsonify({"error": "No correct answer found for this question", "success": False}), 404
@@ -589,13 +650,14 @@ def get_question_frequencies():
     conn = sqlite3.connect("data.db")
     c = conn.cursor()
     c.execute("""
-    SELECT q.question_text, COUNT(*) AS frequency
-    FROM questions q
-    JOIN papers p ON q.paper_id = p.id
-    JOIN courses c ON p.course_id = c.code   -- careful here
-    WHERE c.code = ?
-    GROUP BY q.question_text
-    """, (course_code,))    
+        SELECT q.question_text, COUNT(*) AS frequency
+        FROM questions q
+        JOIN papers p ON q.paper_id = p.id
+        WHERE p.course_id = ?
+        GROUP BY q.question_text
+        ORDER BY frequency DESC
+        LIMIT 10
+        """, (course_code,))
     question_frequencies = c.fetchall()
     conn.close()
     
@@ -632,6 +694,7 @@ def get_paper_by_id():
         "questions": [{"id": question[0], "question_text": question[1], "correct_answer": question[2]} for question in questions]
     }
     return jsonify({"data": data, "success": True}), 200
+    
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
