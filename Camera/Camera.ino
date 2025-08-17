@@ -66,11 +66,13 @@ String device_name = "ESP32-BT-Slave";
 
 BluetoothSerial SerialBT;
 
+#define BAUD_RATE 9600
+
 void setup() {
   // must run the following line
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
  
-  Serial.begin(115200);
+  Serial.begin(BAUD_RATE);
   //Serial.setDebugOutput(true);
   //Serial.println();
   SerialBT.begin(device_name); // initialise bluetooth with defined name
