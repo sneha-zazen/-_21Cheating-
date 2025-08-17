@@ -15,8 +15,8 @@ export default function StatsPage() {
     const fetchData = async () => {
       try {
         const [statsRes, coursesRes] = await Promise.all([
-          axios.get("http://localhost:5000/get_user_stats"),
-          axios.get("http://localhost:5000/get_courses"),
+          axios.get("http://10.89.249.11:5000/get_user_stats"),
+          axios.get("http://10.89.249.11:5000/get_courses"),
         ]);
 
         setSessionStats(statsRes.data.data.user_stats || []);
@@ -34,7 +34,7 @@ export default function StatsPage() {
   const updateCourse = (courseId) => {
     setSelectedCourse(courseId);
     axios
-      .get(`http://localhost:5000/get_question_frequencies`, {
+      .get(`http://10.89.249.11:5000/get_question_frequencies`, {
         params: { course_id: courseId },
       })
       .then((response) => {

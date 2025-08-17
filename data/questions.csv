@@ -149,3 +149,32 @@ id,question_text,correct_answer,paper_id,paper_id_label
 148,"If the frequency of operation is 700Hz, what is the equivalent impedance of this network?",1328e^{j0.816}Ω,5,5
 149,"In the circuit shown in Figure 6 with the component values listed above, what is the value of the phasor current I?",12.1e^{j0.84} mA,5,5
 150,"In the circuit shown in Figure 6 with the component values listed above, what is the value of the phasor voltage across the inductor, V_L?",1.46e^{j2.41} V,5,5
+151,What exception should be used at <Error> to complete the function according to its specification?,,,
+152,"What is the value of x after only the following has been evaluated? x = ""Hello Hello"".find(""Hello"")",,,
+153,"Python - In the provided snippet of code, what kind of error should be handled here?",,,
+154,"What is the value x after only the following has been evaluated? x = map (sqrt) [1,4,9]",,,
+155,"What exception should be used at expr to prevent a crash, when according to its specific nature?",,,
+156,What does 'Hello Hello'.find('Hello') return?,,,
+157,What exception should replace <error> to complete the function according to its specification?,,,
+158,"What is the value of x after only the following has been evaluated? x = ""Hello Hello"".find(""Hello"") Given that s.find(sub[, start[, end]]) -> int Return the lowest index in s where substring sub is found, such that sub is contained within s[start:end]. Optional arguments start and end are interpreted as in slice notation. Return -1 on failure.",,,
+159,"What exception should be used at <Error> to complete the function according to its specification? def get_element(xs: List[int], index: int) -> int: """""" Retrieves the element at the provided index in the list. Continues prompting the user until a valid index is entered. """""" try: return xs[index] except <Error>: return get_element(xs, int(input('Enter a valid index: ')))",,,
+160,What exception should be used at <error> to complete the function assuming x is a specialization?,,,
+161,"Given that s.find(sub[, start[, end]]) -> int
+
+Return the lowest index in S where substring sub is found, such that sub is contained within S[start:end]. Optional arguments start and end are interpreted as in slice notation.
+
+Return -1 on failure.",,,
+162,"What exception should be used at <Error> to complete the function according to its specification?
+
+def get_element(xs: List[int], index: int) -> int:
+    """"""
+    Retrieves the element at the provided index in the List.
+    Continues prompting the user until a valid index is entered.
+    """"""
+    try:
+        return xs[index]
+    except <Error>:
+        return get_element(xs, int(input(""Enter a valid index: "")))",,,
+163,"What is the value of x after only the following has been evaluated? x = ""Hello Hello"".find('Hello')",,,
+164,What is the value of x after only the following has been evaluated? x = 'Hello hi'.find('Hello'),,,
+165,What exception should be used at <insert> to complete the function according to its specification?,,,

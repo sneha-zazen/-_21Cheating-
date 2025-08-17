@@ -10,7 +10,7 @@ export default function UserInfoPage({ currentUser }) {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000//get_user_sessions", {
+      .get("http://10.89.249.11:5000//get_user_sessions", {
         params: { userid: currentUser },
       })
       .then((response) => {

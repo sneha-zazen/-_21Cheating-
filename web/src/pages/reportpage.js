@@ -22,7 +22,7 @@ export default function ReportPage({ currentUser }) {
     // Fetch report data from backend
 
     axios
-      .get(`http://localhost:5000/get_session`, {
+      .get(`http://10.89.249.11:5000/get_session`, {
         params: { session_id: sessionid },
       })
       .then((response) => {

@@ -39,7 +39,7 @@ def pretrain_model():
     # load database
     # db = database.get("exam_questions") #TODO actually load the database
     db = pd.read_csv(r"data\questions.csv")
-
+    db = db.dropna(subset=["correct_answer"])
     db_size = db.shape[0]
     print("Database size:", db_size)
     training_df = db.loc[0:(db_size*0.6)]
@@ -67,8 +67,8 @@ def pretrain_model():
     response = client.fine_tuning.jobs.create(
         training_file=training_file_id,
         validation_file=validation_file_id,
-        model="gpt-4o-mini-2024-07-18",
-        suffix="recipe-ner",
+        model="gpt-4.1-mini",
+        suffix="SASSI_finetune",
     )
 
     job_id = response.id
@@ -82,5 +82,45 @@ def pretrain_model():
     print("Status:", response.status)
     print("Trained Tokens:", response.trained_tokens)
 
+    return job_id
 
-pretrain_model()
+job_id = pretrain_model()
+# response = client.fine_tuning.jobs.retrieve(job_id)
+# fine_tuned_model_id = response.fine_tuned_model
+
+# if fine_tuned_model_id is None:
+#     raise RuntimeError(
+#         "Fine-tuned model ID not found. Your job has likely not been completed yet."
+#     )
+
+# print("Fine-tuned model ID:", fine_tuned_model_id)
+
+# job_id = "ftjob-SYQpMQT9toF7vic8bl24FV2P"
+response = client.fine_tuning.jobs.retrieve(job_id)
+# events = response.data
+ 
+# while(events[-1].message != "Fine-tuning completed"):
+#     events = response.data
+#     print(events[-1].message)
+print("Job ID:", response.id)
+print("Status:", response.status)
+print("Trained Tokens:", response.trained_tokens)
+
+response = client.fine_tuning.jobs.list_events(job_id)
+
+events = response.data
+events.reverse()
+
+for event in events:
+    print(event.message)
+
+response = client.fine_tuning.jobs.retrieve(job_id)
+fine_tuned_model_id = response.fine_tuned_model
+while fine_tuned_model_id is None:
+    print(
+        "Fine-tuned model ID not found. Your job has likely not been completed yet."
+    )
+    response = client.fine_tuning.jobs.retrieve(job_id)
+    fine_tuned_model_id = response.fine_tuned_model
+print("Fine-tuned model ID:", fine_tuned_model_id  )
+
