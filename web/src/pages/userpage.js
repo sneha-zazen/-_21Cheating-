@@ -32,7 +32,7 @@ export default function UserInfoPage({ currentUser }) {
   // Filter sessions by search
   const filteredSessions = sessions.filter(
     (s) =>
-      s.id.includes(search) ||
+      s.id.toString().includes(search) ||
       s.score.toString().includes(search) ||
       s.hintsUsed.toString().includes(search)
   );
@@ -96,7 +96,7 @@ export default function UserInfoPage({ currentUser }) {
                   }}
                 >
                   <div style={{ fontWeight: 600, color: themeColor }}>
-                    Session: {session.id}
+                    Session: {session.course_id}
                   </div>
                   <div style={{ marginTop: 6, color: "#333" }}>
                     Score:{" "}
