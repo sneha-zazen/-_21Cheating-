@@ -69,7 +69,7 @@ export default function HomePage({ currentUser }) {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/get_courses")
+      .get("http://10.89.249.11:5000/get_courses")
       .then((response) => {
         if (response.data.success) {
           setCourses(response.data.data.courses);
@@ -106,7 +106,7 @@ export default function HomePage({ currentUser }) {
   const handleAddcourse = () => {
     if (inputValue && !courses.includes(inputValue)) {
       axios
-        .post("http://localhost:5000/create_course", {
+        .post("http://10.89.249.11:5000/create_course", {
           code: inputValue,
           name: inputValue,
         })
@@ -133,7 +133,7 @@ export default function HomePage({ currentUser }) {
   const onStart = () => {
     setRunning(true);
     axios
-      .post("http://localhost:5000/create_session", {
+      .post("http://10.89.249.11:5000/create_session", {
         user_id: currentUser?.userid || 1,
         course_id: selectedCourse,
         paper_id: 1,

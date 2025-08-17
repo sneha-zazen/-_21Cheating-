@@ -16,7 +16,7 @@ export default function LoginPage({ setCurrentUser }) {
 
     // local address
     axios
-      .post("http://localhost:5000/create_user", { username: name })
+      .post("http://10.89.249.11:5000/create_user", { username: name })
       .then((response) => {
         if (response.data.success) {
           console.log(response);
@@ -29,7 +29,7 @@ export default function LoginPage({ setCurrentUser }) {
       })
       .catch((error) => {
         axios
-          .get("http://localhost:5000/get_user", {
+          .get("http://10.89.249.11:5000/get_user", {
             params: { username: name },
           })
           .then((response) => {

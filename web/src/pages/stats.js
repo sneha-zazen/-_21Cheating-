@@ -15,8 +15,8 @@ export default function StatsPage() {
     const fetchData = async () => {
       try {
         const [statsRes, coursesRes] = await Promise.all([
-          axios.get("http://localhost:5000/get_user_stats"),
-          axios.get("http://localhost:5000/get_courses"),
+          axios.get("http://10.89.249.11:5000/get_user_stats"),
+          axios.get("http://10.89.249.11:5000/get_courses"),
         ]);
 
         console.log("Session stats:", statsRes.data);

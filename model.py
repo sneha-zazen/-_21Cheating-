@@ -154,6 +154,7 @@ def process_image(image_file):
             }
         ],
     )
+
     
     # Extract the response text
     print("Response:", response)
