@@ -9,10 +9,14 @@
 #define rxPin 7
 #define txPin 2
 
+#define LIST_SIZE 30
+#define CHAR_LIMIT 25
+
 // Set up a new SoftwareSerial object
 SoftwareSerial mySerial =  SoftwareSerial(rxPin, txPin);
 
 unsigned int count = 0;
+unsigned int hintCount = 0;
 TouchScreen ts = TouchScreen(XP, YP, XM, YM); //init TouchScreen port pins
 TextOrientation orientation;
 int color = WHITE;  //Paint brush color
@@ -26,8 +30,12 @@ void setup() {
     pinMode(rxPin, INPUT);
     pinMode(txPin, OUTPUT);
 
-    Serial.begin(115200);
+    Serial.begin(9600);
 
+    mySerial.begin(9600);
+
+
+    Serial.println("Start programme");
     // Set the baud rate for the SerialSoftware object
     // portOne.begin(115200);
 
@@ -38,26 +46,41 @@ void setup() {
     // Tft.drawString("We do not condone cheating!", 20, 160, 2, WHITE, orientation); // 27, max 25?
     Tft.drawString("We DO not condone", 20, 160, 2, WHITE, orientation);
     Tft.drawString("cheating!", 20, 140, 2, WHITE, orientation);
+    Tft.drawString("PRESS SCREEN", 20, 120, 2, WHITE, orientation);
 
 }
 
+String sendMessage;
+String receivedMessage;
+String hintsList[LIST_SIZE];
+
+
 void loop() {
     // read from STM camera module, decode data
-    // ====== ADD CODE HERE ======
-    char state = '0';
+    char input;
 
     if (mySerial.available() > 0) {
-        state = mySerial.read();
-    }
+        input = mySerial.read();
+        // Serial.println(input);
+        if (input == '\n') {
+            // print out msg and clear
+            Serial.println(sendMessage);
+            hintsList[hintCount] = sendMessage;
+            hintCount += 1;
+            sendMessage = "";
+        } else {
+            sendMessage += input;
+        }
 
-    if (state == '0') {
-        Tft.drawString("Touch count: ", 20, 120, 2, RED, orientation);
-        Tft.drawString("0", 40, 100, 2, RED, orientation);
+        if (hintCount == LIST_SIZE) {
+            Serial.println("Full");
+            for (int i = 0; i < LIST_SIZE; i++) {
+                // Serial.println(char(i));
+                Serial.print(hintsList[i]);
+            }
+            hintCount = 0;
+        }
     }
-    else if (state == '1') {
-        Tft.drawString("Touch count: ", 20, 120, 2, BLUE, orientation);
-        Tft.drawString("0", 40, 100, 2, BLUE, orientation);
-    } 
 
     // checking for a touch screen press
     // a point object holds x y and z coordinates.
@@ -71,16 +94,26 @@ void loop() {
     // pressure of 0 means no pressing!
     if (p.z > __PRESURE) {
         // when screen is touched, scroll to next hint
-        // ====== THIS NEEDS TO BE CHANGED ======
+
+        // colour cycling for debugging
+        // count = count % 8;
+        // color = colors[count];
+
+        // clear screen
+        Tft.fillScreen(0, 250, 0, 350, BLACK);
+
+        for (int i = 0; i < (hintsList[count].length() / CHAR_LIMIT) + 1; i++) {
+            // last loop
+            if (i == (hintsList[count].length() / CHAR_LIMIT)) {
+                Tft.drawString(hintsList[count].substring(i*CHAR_LIMIT, hintsList[count].length()).c_str(), 10, 200-(i*20), 2, color, orientation);
+            } else {
+                Tft.drawString(hintsList[count].substring(i*CHAR_LIMIT, (i+1)*CHAR_LIMIT).c_str(), 10, 200-(i*20), 2, color, orientation);
+            }
+        }
 
         count += 1;
-        count = count % 8;
-        color = colors[count];
-        // char countStr[16] = "Touch count: " + String(count);
-        // Tft.drawString(countStr, 20, 160, 2, WHITE, orientation);
+        count = count % 30;
 
-        Tft.drawString("Touch count: ", 20, 120, 2, color, orientation);
-        Tft.drawString("0", 40, 100, 2, color, orientation);
         delay(150); // delay to reduce bouncing
     }
 
