@@ -78,7 +78,7 @@ export default function App() {
                 transition: "background 0.2s",
               }}
             >
-              User
+              History
             </button>
             <button
               onClick={() => navigate(`/stats`)}
