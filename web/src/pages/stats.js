@@ -38,7 +38,8 @@ export default function StatsPage() {
         params: { course_id: courseId },
       })
       .then((response) => {
-        setQuestionFrequencies(response.data.data.frequencies || []);
+        console.log("Question frequencies:", response.data);
+        setQuestionFrequencies(response.data.data.question_frequencies || []);
       })
       .catch((error) => {
         console.error("Error fetching question frequencies:", error);
@@ -120,7 +121,7 @@ export default function StatsPage() {
             <option value="">Select a course</option>
             {courses.map((course) => (
               <option key={course.id} value={course.id}>
-                {course.name}
+                {course.code}
               </option>
             ))}
           </select>
@@ -138,7 +139,7 @@ export default function StatsPage() {
             }}
           >
             <h3 style={{ color: themeColor, marginBottom: 12 }}>
-              Questions for Course ID: {selectedCourse}
+              Common Questions for Course ID: {selectedCourse}
             </h3>
             <ul style={{ listStyle: "none", padding: 0 }}>
               {questionFrequencies.map((question, index) => (

@@ -35,6 +35,8 @@ export default function HomePage({ currentUser }) {
       formData.append("file", files[i]);
       formData.append("session_id", sessionId); // if your endpoint uses this
 
+      console.log(`Uploading file: ${files[i].name}`);
+
       try {
         const response = await axios.post(
           "http://10.89.249.11:5000/process_paper",
