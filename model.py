@@ -4,6 +4,7 @@ import pprint
 import json
 
 client = OpenAI()
+fine_tuned_model_id = "ftjob-VnNl80LW2xpCd7XLDWKda8Tp"   # TODO replace with the fine-tuned model ID
 
 PROMPT = """There is an attached image of an exam question with an answer circled. Your job 
 is to extract what the question is and what the user has answerd and what the answer should be. For example, if the image 
@@ -135,7 +136,8 @@ def process_image(image_file):
     image_b64 = base64.b64encode(image_bytes).decode("utf-8")  
     
     response = client.chat.completions.create(
-        model="ftjob-VnNl80LW2xpCd7XLDWKda8Tp",
+        # model="gpt-4.1-mini",
+        model = fine_tuned_model_id,
         messages=[
             {
                 "role": "user",

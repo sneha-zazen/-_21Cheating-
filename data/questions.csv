@@ -1,0 +1,151 @@
+id,question_text,correct_answer,paper_id,paper_id_label
+1,Consider the one-port network shown below. What is the equivalent resistance of this network?,109.1 Ω,1,1
+2,Consider the one-port network shown below. Note that the resistor values are shown as conductances. What is the equivalent resistance of this network?,125.05 kΩ,1,1
+3,Consider the one-port network shown below. What is the equivalent resistance of this network?,240 Ω,1,1
+4,Consider the circuit below. The equivalent resistance of this network is measured as being 191.21 Ω. What is the value of the resistor R1?,320 Ω,1,1
+5,Which of the following is a unit of voltage?,Volts,1,1
+6,"One way to solve linear circuits is the method of superposition. When using the method of superposition, which of the following schematics in the figure below is a correct representation of the circuit in Figure 1 when the 12V voltage source is set to zero?",Figure (A),1,1
+7,"With reference to Figure 1, which of the following is a correct Kirchhoff’s Voltage Law Equation?",1800I1 = 910I3 + 3200I2,1,1
+8,"With reference to Figure 1, which of the following is a correct Kirchhoff’s Current Law Equation?",V_B - V_A / 910 + V_C - V_A / 3200 + V_D - V_A / 4100 = 0,1,1
+9,"With reference to Figure 1, which of the following is a correct Kirchhoff’s Current Law Equation at node D?",I4 + I5 + I6 = 0,1,1
+10,"In the circuit shown in Figure 1, what is the value of Current I5?",-8 mA,1,1
+11,"In the circuit shown in Figure 1, what is the value of current I1?",-5.16 mA,1,1
+12,"In the circuit shown in Figure 1, what is the value of node voltage VC?",,1,1
+13,"In the circuit shown in Figure 1, what is the value of branch voltage V2?",,1,1
+14,"In the circuit shown in Figure 1, what is the value of the power consumed by the 8mA current source?",,1,1
+15,"In the circuit shown in Figure 1, what is the value of the power consumed by the 4.1kΩ resistor?",,1,1
+16,"In the circuit shown in Figure 1, what is the value of the total power consumed by all the resistors in the circuit (i.e. including the 910Ω, 1.8kΩ, 3.2kΩ and 4.1kΩ resistors)?",,1,1
+17,"If the one-port network of Figure 2 is replaced by its Thevenin Equivalent Circuit, what is the value of the voltage source in that equivalent circuit, VT?",,1,1
+18,"If the one-port network of Figure 2 is replaced by its Thevenin Equivalent Circuit, what is the value of the series resistor in that equivalent circuit, RT?",,1,1
+19,"If the one-port network of Figure 2 is replaced by its Norton Equivalent Circuit, what is the value of the current source in that equivalent circuit, IN?",,1,1
+20,"Given the circuit schematic of Figure 3 and the diode I−V characteristic of Figure 4, which of the following is closest to the value of VD?",,1,1
+21,"Given the circuit schematic of Figure 3 and the diode I−V characteristic of Figure 4, which of the following is closest to the value of ID?",,1,1
+22,"With respect to the schematic in Figure 3, and the diode I−V characteristic of Figure 4, what percentage of the power supplied by the voltage source is dissipated by the LED? Choose the closest answer.",,1,1
+23,"In a particular application, you need to ensure that the current through the diode, ID is set to 3mA. You are able to modify the circuit in Figure 3 by replacing the voltage source with another value in order to achieve this desired current (however the resistor should remain the same, and you should use an identical LED). What value voltage source should you choose? Choose the closest answer.",,1,1
+24,A sinusoidal voltage is displayed in the figure below. Which of the following equations best models the sinusoidal voltage displayed?,Vs(t) = 120Cos(190t + 1.05),1,1
+25,Which of the following expressions correctly models the voltage v(t) across an inductor (with inductance L) to the current i(t) through the inductor?,i(t) = (1/L) ∫ v(t) dt,1,1
+26,Consider the one-port network shown below: What is the equivalent inductance of this network?,0.833 mH,1,1
+27,"In the circuit shown below, L1 = 2mH, R2 = 1.2kΩ, C3 = 0.1 μF. At a particular instant of time, vc = 3V, ic = 2A, vL = -4V, iL = -5A. At that instant of time, how much energy is stored in the inductor?",25 mJ,1,1
+28,"Consider the one-port network shown below. If the frequency of operation is 5kHz, what is the equivalent impedance of this network?",1800 + j691.2 Ω,1,1
+29,Refer to the circuit in the Figure 5. The frequency of the AC voltage source is 50Hz. What is the value of the phasor current (I1)?,0.602e^(j0.75) A,1,1
+30,Refer to the circuit in the figure 5. The frequency of the AC voltage source is 50Hz. What is the value of the phasor voltage across the capacitor (V2)?,233.69e^(-j0.82) V,1,1
+31,Consider the one-port network shown below. What is the equivalent resistance of this network?,28.731 kΩ,2,2
+32,Consider the one-port network shown below. Note that the resistor values are shown as conductances. What is the equivalent resistance of this network?,190.5 Ω,2,2
+33,Consider the one-port network shown below. What is the equivalent resistance of this network?,256.6 Ω,2,2
+34,Consider the circuit below. The equivalent resistance of this network is measured as being 12.61Ω. What is the value of the resistor R1?,"A unique value of the resistor R1 is able to be calculated with the information provided, but neither (A) or (B) are correct.",2,2
+35,Which of the following is a unit of current?,Both (B) and (C) are units of current.,2,2
+36,"One way to solve linear circuits is the method of superposition. When using the method of superposition, which of the following schematics in the figure below is a correct representation of the circuit when the 4.5mA current source is set to zero?",Figure (D),2,2
+37,"When using the method of superposition, what is the value of the voltage V5 when the 9mA current source is set to zero?",12.15 V,2,2
+38,"With reference to Figure 1, which of the following is a correct Kirchhoff’s Voltage Law Equation?",1100I3 + 3100I1 = 2900I2,2,2
+39,"With reference to Figure 1, which of the following is a correct Kirchhoff’s Current Law Equation?",VB−VC/1100 + VA−VC/2900 + VD−VC/2700 = 0,2,2
+40,"With reference to Figure 1, which of the following is a correct Kirchhoff’s Current Law Equation at node D?","None of answers (A)-(C) are correct, but it is possible to write a correct Kirchhoff’s Current Law Equation at node D",2,2
+41,"In the circuit shown in Figure 1, what is the value of current I4?",-4.5 mA,2,2
+42,"In the circuit shown in Figure 1, what is the value of current I5?",,2,2
+43,"In the circuit shown in Figure 1, what is the value of node voltage VC?",,2,2
+44,"In the circuit shown in Figure 1, what is the value of branch voltage V2?",,2,2
+45,"In the circuit shown in Figure 1, what is the value of branch current I3?",,2,2
+46,"In the circuit shown in Figure 1, what is the value of the power supplied by the 9mA current source?",,2,2
+47,"In the circuit shown in Figure 1, what is the value of the total power consumed by all the resistors in the circuit (i.e. including the 1.1kΩ, 2.7kΩ, 2.9kΩ and 3.1kΩ resistors)?",,2,2
+48,"If the one-port network of Figure 2 is replaced by its Thevenin Equivalent Circuit, what is the value of the voltage source in that equivalent circuit, VT?",,2,2
+49,"If the one-port network of Figure 2 is replaced by its Thevenin Equivalent Circuit, what is the value of the series resistor in that equivalent circuit, RT?",,2,2
+50,"If the one-port network of Figure 2 is replaced by its Norton Equivalent Circuit, what is the value of the current source in that equivalent circuit, IN?",,2,2
+51,"Given the circuit schematic of Figure 3 and the diode I−V characteristic of Figure 4, which of the following is closest to the value of VD?",,2,2
+52,"Given the circuit schematic of Figure 3 and the diode I−V characteristic of Figure 4, which of the following is closest to the value of ID?",,2,2
+53,"With respect to the schematic in figure 3, what percentage of the power supplied by the current source is dissipated by the LED? Choose the closest answer.",,2,2
+54,"In a particular application, you need to ensure that the current through the diode, ID is set to 4mA. You are able to modify the circuit in Figure 3 by replacing the resistor with another value in order to achieve this desired current (however the current source should remain the same, and you should use an identical LED). What value resistor should you choose?",,2,2
+55,A sinusoidal voltage is displayed in the figure below. Which of the following equations best models the sinusoidal voltage displayed?,Vs(t) = 120Cos(315t − 1.0),2,2
+56,Which of the following expressions correctly models the voltage v(t) across an inductor (with inductance L) to the current i(t) through the inductor?,None of the above,2,2
+57,A practical capacitor does not allow an instantaneous step change in its:,Voltage,2,2
+58,"In the circuit shown below, L1 = 6 H, R2 = 42 Ω, C3 = 27 µF. At a particular instant of time, vc = −12V, ic = 4 A, vL = 14V, iL = -6A. At that instant of time, how much energy is stored in the inductor?",108 J,2,2
+59,"Consider the one-port network shown below. If the frequency of operation is 100Hz, what is the equivalent impedance of this network?",370 - j132.6Ω,2,2
+60,Refer to the circuit in the figure below. The frequency of the AC voltage source is 100Hz. What is the value of the phasor voltage across the capacitor (V2)?,57.36e^{-j1.23} V,2,2
+61,Consider the one-port network shown below. What is the equivalent conductance of this network?,169 µS,3,3
+62,Consider the one-port network shown below. Note that the resistor values are shown as conductances. What is the equivalent resistance of this network?,92.59 Ω,3,3
+63,Consider the one-port network shown below. What is the equivalent resistance of this network?,391.7 Ω,3,3
+64,Consider the circuit below. The equivalent resistance of this network is measured as being 1030Ω. What is the value of the resistor R1?,There is no possible physical resistor value for R1 which satisfies the overall resistance of the network.,3,3
+65,"One way to solve linear circuits is the method of superposition. When using the method of superposition, which of the following schematics in the figure below is a correct representation of the circuit when the 7mA current source is set to zero?",Figure (C),3,3
+66,"When using the method of superposition, what is the value of current I3 when the 9V voltage source is set to zero?",3.03 mA,3,3
+67,"With reference to Figure 1, which of the following is a correct Kirchoff’s Voltage Law Equation?",2200𝐼2 + 2700𝐼5 + 4800𝐼6 = 0,3,3
+68,"With reference to Figure 1, which of the following is a correct Kirchoff’s Current Law Equation?",\frac{V_B - V_C}{810} + \frac{V_D - V_C}{2700} + \frac{V_A - V_C}{2200} = 0,3,3
+69,"With reference to Figure 1, which of the following is a correct Kirchoff’s Current Law Equation at node D?",I4 + I6 + I5 = 0,3,3
+70,"In the circuit shown in Figure 1, what is the value of voltage V1?",-9 V,3,3
+71,"In the circuit shown in Figure 1, what is the value of current I5?",,3,3
+72,"In the circuit shown in Figure 1, what is the value of node voltage VA?",,3,3
+73,"In the circuit shown in Figure 1, what is the value of branch voltage V3?",,3,3
+74,"In the circuit shown in Figure 1, what is the value of the power supplied by the 7mA current source?",,3,3
+75,"In the circuit shown in Figure 1, what is the value of the total power consumed by all the resistors in the circuit (i.e. including the 810Ω, 2.2kΩ, 2.7kΩ and 4.8kΩ resistors)?",,3,3
+76,"If the one-port network of Figure 2 is replaced by its Thevenin Equivalent Circuit, what is the value of the voltage source in that equivalent circuit, VT?",,3,3
+77,"If the one-port network of Figure 2 is replaced by its Thevenin Equivalent Circuit, what is the value of the series resistor in that equivalent circuit, RT?",,3,3
+78,"If the one-port network of Figure 2 is replaced by its Norton Equivalent Circuit, what is the value of the current source in that equivalent circuit, IN?",,3,3
+79,"If the one-port network of Figure 2 is replaced by its Norton Equivalent Circuit, what is the value of the parallel resistor in that equivalent circuit, RN?",,3,3
+80,"Which of the following equations must the solution to the circuit in Figure 3 satisfy? Note, RN refers to the Norton resistance as calculated in Question (19); VTH refers to the Thevenin Voltage calculated in Question (17); VD refers to the voltage across the diode, and ID refers to the current through the diode (as labelled in Figure 3).",It is not possible to express the solution to this circuit as a linear relationship between ID and VD because the diode is a non-linear component.,3,3
+81,"Given the circuit of Figure 3 and the diode I−V characteristic of Figure 4, which of the following is closest to the value of VD?",,3,3
+82,"Given the circuit of Figure 3 and the diode I−V characteristic of Figure 4, which of the following is closest to the value of ID?",,3,3
+83,"You are designing an LED light. This will consist of a 24V lead-acid battery connected in series with a single resistor and the LED characterised in figure 5 above. The battery can be modelled as a 24V ideal voltage source. The datasheet for the diode recommends that for maximum operational life, the voltage across the diode should be set to 15V. Which of the following values for the series resistor will result in a voltage across the diode (VD) that is closest to 15V?",2200Ω,3,3
+84,The LED characterised in figure 5 can be assumed to be 100% efficient (i.e. all power dissipated by the LED is converted to light). What is the overall efficiency of the circuit described in Question (22) when the voltage across the diode is set to 15V (i.e. what percentage of total power supplied by the battery is converted to light)?,62.5%,3,3
+85,A sinusoidal voltage is displayed in the figure below. Which of the following equations best models the sinusoidal voltage displayed?,Vs(t) = 340Cos(315t + 0.8),3,3
+86,Which of the following expressions correctly models the voltage v(t) across an inductor (with inductance L) to the current i(t) through the inductor?,i(t) = 1/L ∫ v(t) dt,3,3
+87,A practical inductor does not allow an instantaneous step change in its:,Both (B) and (C),3,3
+88,"In the circuit shown below, L1 = 10 H, R2 = 50 Ω, C3 = 38 μF. At a particular instant of time, vc = −14V, ic = −4 A, vL = 12V, iL = 5A. At that instant of time, how much energy is stored in the capacitor?",3.72 mJ,3,3
+89,"Consider the one-port network shown below. If the frequency of operation is 10kHz, what is the equivalent impedance of this network?",3765 + j1123.8Ω,3,3
+90,"Refer to the figure below where: VS = 12e^(j0) V, f = 100Hz, R = 21 Ω, C = 82 μF, L = 33 mH. What is the value of the phasor voltage across the capacitor (VC)?",11.08e^(-j1.63)V,3,3
+91,What is the equivalent resistance of this network?,125.1 kΩ,4,4
+92,What is the equivalent resistance of this network?,98.6 Ω,4,4
+93,What is the equivalent resistance of this network?,289.6 Ω,4,4
+94,Which of the following is a unit of conductance?,Siemens,4,4
+95,"One way to solve linear circuits is the method of superposition. When using the method of superposition, which of the following schematics in the figure below is a correct representation of the circuit when the 15V voltage source is set to zero?",Figure (B),4,4
+96,"With reference to Figure 1, which of the following is a correct Kirchoff’s Voltage Law Equation?",1200I2 = 3700I5 + 5700I6,4,4
+97,"With reference to Figure 1, which of the following is a correct Kirchoff’s Current Law Equation?",(VB - VC)/870 + (VD - VC)/3700 + (VA - VC)/1200 = 0,4,4
+98,"With reference to Figure 1, which of the following is a correct Kirchoff’s Current Law Equation at node D?",I5 = I4 + I6,4,4
+99,"In the circuit shown in Figure 1, what is the value of voltage V4?",15 V,4,4
+100,"In the circuit shown in Figure 1, what is the value of current I3?",8.21 mA,4,4
+101,"In the circuit shown in Figure 1, what is the value of node voltage VC?",,4,4
+102,"In the circuit shown in Figure 1, what is the value of branch voltage V1?",,4,4
+103,"In the circuit shown in Figure 1, what is the value of the power consumed by the 15V voltage source?",,4,4
+104,"In the circuit shown in Figure 1, what is the value of the power consumed by the 3.7kΩ resistor?",,4,4
+105,"In the circuit shown in Figure 1, what is the value of the total power consumed by all the resistors in the circuit (i.e. including the 870Ω, 1.2kΩ, 3.7kΩ and 5.7kΩ resistors)?",,4,4
+106,"If the one-port network of Figure 2 is replaced by its Thevenin Equivalent Circuit, what is the value of the voltage source (VTH) in that equivalent circuit?",,4,4
+107,"If the one-port network of Figure 2 is replaced by its Thevenin Equivalent Circuit, what is the value of the series resistor (RTH) in that equivalent circuit?",,4,4
+108,"If the one-port network of Figure 2 is replaced by its Norton Equivalent Circuit, what is the value of the current source (IN) in that equivalent circuit?",,4,4
+109,Which of the following equations must the solution to the circuit in Figure 3 satisfy?,,4,4
+110,"Given the circuit in Figure 3, and the diode I−V characteristic of Figure 4, which of the following is closest to the value of VD?",,4,4
+111,"Given the circuit in Figure 3 and the diode I−V characteristic of Figure 4, which of the following is closest to the value of ID?",,4,4
+112,"You are designing a LED light, and have purchased a light element which consists of a LED (with the characteristics shown in Figure 4) connected in series with a 1.1 kΩ resistor. This light element is shown below. This light will be powered using a lithium-polymer battery/batteries. Each lithium-polymer battery can be modelled as a 3.3V ideal voltage source. Which of the following battery configurations, when connected to the light element, will achieve a current through the LED which is closest to 2.0mA?",Two batteries connected in series,4,4
+113,The LED characterised in Figure 4 can be assumed to be 90% efficient (i.e. 90% of power dissipated by the LED is converted to light). Which of the following is closest to the overall efficiency of the circuit described in Question (22) when the battery configuration is chosen such that the current through the LED is set to 2.0 mA (i.e. what percentage of total power supplied by the battery/batteries is converted to light)?,68.2%,4,4
+114,A sinusoidal voltage is displayed in the figure below. Which of the following equations best models the sinusoidal voltage displayed?,Vs(t) = 340Cos(315t + 0.8),4,4
+115,"Consider the circuit below where L1 = 1.2mH, R2 = 1.6kΩ, C3 = 0.1μF. At a particular instant of time, vc = 12V, ic = 1.3A, vL = -9.3V, iL = -2.2A. At that instant of time, how much energy is stored in the inductor?",2.904 mJ,4,4
+116,Which of the following expressions correctly models the voltage v(t) across a capacitor (with capacitance C) to the current i(t) through the capacitor?,i(t) = C dv(t)/dt,4,4
+117,"Consider the one-port network shown below. If the frequency of operation is 600Hz, what is the equivalent impedance of this network?",522.6 + j595.8 Ω,4,4
+118,"Consider the one-port network shown below. If the frequency of operation is 50Hz, what is the equivalent impedance of this network?",750e^{-j0.43}Ω,4,4
+119,"In the circuit shown in Figure 5 with the component values listed above, what is the value of the phasor current I?",19.3e^{j0.668} mA,4,4
+120,"In the circuit shown in Figure 5 with the component values listed above, what is the value of the phasor voltage across the capacitor, VC?",10.89e^{-j0.90} V,4,4
+121,What is the equivalent resistance of this network?,2.230 MΩ,5,5
+122,What is the equivalent resistance of this network (noting resistor values are shown as conductances)?,92.59 Ω,5,5
+123,What is the equivalent resistance of this network?,397.0 Ω,5,5
+124,Which of the following is a unit of inductance?,None of the above,5,5
+125,"With reference to Figure 1, which of the following is a correct Kirchoff's Voltage Law Equation?",V2 = V1 + V3,5,5
+126,"With reference to Figure 1, which of the following is a correct Kirchoff's Current Law Equation?",V_B - 12/4200 + V_B - V_C / 910 = 0.006,5,5
+127,"With reference to Figure 1, which of the following is a correct Kirchoff's Current Law Equation at node D?","None of answers (A)-(C) are correct, but it is possible to write a correct Kirchoff's Current Law Equation at node D",5,5
+128,"In the circuit shown in Figure 1, what is the value of current I4?",-6 mA,5,5
+129,"In the circuit shown in Figure 1, what is the value of current I5?",,5,5
+130,"In the circuit shown in Figure 1, what is the value of node voltage V_B?",,5,5
+131,"In the circuit shown in Figure 1, what is the value of branch voltage V6?",,5,5
+132,"In the circuit shown in Figure 1, what is the value of branch voltage V2?",,5,5
+133,"In the circuit shown in Figure 1, what is the value of the power consumed by the 6mA current source?",,5,5
+134,"In the circuit shown in Figure 1, what is the value of the power consumed by the 910Ω resistor?",,5,5
+135,"In the circuit shown in Figure 1, what is the value of the power consumed by all the components in the circuit in total?",,5,5
+136,"If the one-port network of Figure 2 is replaced by its Thevenin Equivalent Circuit, what is the value of the voltage source in that equivalent circuit, V_T?",,5,5
+137,"If the one-port network of Figure 2 is replaced by its Thevenin Equivalent Circuit, what is the value of the series resistor in that equivalent circuit, R_T?",,5,5
+138,"If the one-port network of Figure 2 is replaced by its Norton Equivalent Circuit, what is the value of the current source in that equivalent circuit, I_N?",,5,5
+139,Which of the following equations must the solution to the circuit in figure 4 satisfy?,I_D = I_N - 1/R_{TH} V_D,5,5
+140,"Given the circuit in Figure 3, and the diode I-V characteristic of Figure 4, which of the following is closest to the value of V_D?",10 V,5,5
+141,"Given the circuit in Figure 3 and the diode I-V characteristic of Figure 4, which of the following is closest to the value of I_D?",3 mA,5,5
+142,"You are designing an LED light. This will consist of a 24V lead-acid battery connected in series with a single resistor and the LED characterised in figure 4 above. The battery can be modelled as a 24V ideal voltage source. The datasheet for the diode recommends that for maximum operational life, the voltage across the diode should be set to 15V. Which of the following values for the series resistor will result in a voltage across the diode (V_D) that is closest to 15V?",3100 Ω,5,5
+143,The LED characterised in figure 4 can be assumed to be 100% efficient (i.e. all power dissipated by the LED is converted to light). What is the overall efficiency of the circuit described in Question (22) when the voltage across the diode is set to 15V (i.e. what percentage of total power supplied by the battery is converted to light)?,,5,5
+144,A sinusoidal voltage is displayed in the figure below. Which of the following equations best models the sinusoidal voltage displayed?,Vs(t) = 120Cos(315t - 1.0),5,5
+145,"At a particular instant of time, v_c = -9V, i_c = -600mA, v_L = 3.6V, i_L = 700mA. At that instant of time, how much energy is stored in the inductor?",53.9 mJ,5,5
+146,"At a particular instant of time, v_c = -9V, i_c = -600mA, v_L = 3.6V, i_L = 700mA. At that instant of time, how much energy is stored in the capacitor?",1.90 mJ,5,5
+147,"If the frequency of operation is 2Hz, what is the equivalent impedance of this network?",1769 - j7529 Ω,5,5
+148,"If the frequency of operation is 700Hz, what is the equivalent impedance of this network?",1328e^{j0.816}Ω,5,5
+149,"In the circuit shown in Figure 6 with the component values listed above, what is the value of the phasor current I?",12.1e^{j0.84} mA,5,5
+150,"In the circuit shown in Figure 6 with the component values listed above, what is the value of the phasor voltage across the inductor, V_L?",1.46e^{j2.41} V,5,5
